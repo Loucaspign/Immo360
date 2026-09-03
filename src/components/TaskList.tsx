@@ -34,13 +34,27 @@ function StatusPills({ tasks }: { tasks: Tache[] }) {
   )
 }
 
-interface SocEntry { name: string; tasks: Tache[] }
+interface Entry { name: string; tasks: Tache[] }
 
-function SocGroup({ name, tasks, onRefresh, onEdit }: SocEntry & Pick<Props, 'onRefresh' | 'onEdit'>) {
+function splitByBien(tasks: Tache[]): { biens: [string, Entry][]; general: Tache[] } {
+  const map = new Map<string, Entry>()
+  const general: Tache[] = []
+  for (const t of tasks) {
+    if (t.bien_id && t.bien) {
+      if (!map.has(t.bien_id)) map.set(t.bien_id, { name: t.bien.name, tasks: [] })
+      map.get(t.bien_id)!.tasks.push(t)
+    } else {
+      general.push(t)
+    }
+  }
+  return { biens: [...map.entries()], general }
+}
+
+function BienGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
   return (
-    <div className="grp-soc">
-      <div className="grp-soc-hd">
-        <span className="grp-soc-name">{name}</span>
+    <div className="grp-bien">
+      <div className="grp-bien-hd">
+        <span className="grp-bien-name">{name}</span>
         <StatusPills tasks={tasks} />
       </div>
       {sortTasks(tasks).map(t => (
@@ -50,14 +64,30 @@ function SocGroup({ name, tasks, onRefresh, onEdit }: SocEntry & Pick<Props, 'on
   )
 }
 
-function groupBySoc(tasks: Tache[]): [string, SocEntry][] {
-  const map = new Map<string, SocEntry>()
-  for (const t of tasks) {
-    const id = t.societe_id
-    if (!map.has(id)) map.set(id, { name: t.societe?.name ?? '—', tasks: [] })
-    map.get(id)!.tasks.push(t)
-  }
-  return [...map.entries()]
+function SocGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
+  const { biens, general } = splitByBien(tasks)
+  return (
+    <div className="grp-soc">
+      <div className="grp-soc-hd">
+        <span className="grp-soc-name">{name}</span>
+        <StatusPills tasks={tasks} />
+      </div>
+      {biens.length > 0 ? (
+        <>
+          {biens.map(([id, bien]) => (
+            <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
+          ))}
+          {general.length > 0 && (
+            <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
+          )}
+        </>
+      ) : (
+        sortTasks(tasks).map(t => (
+          <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
+        ))
+      )}
+    </div>
+  )
 }
 
 export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: Props) {
@@ -69,48 +99,45 @@ export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: 
     )
   }
 
-  // Vue société : grouper par bien
+  // Vue société : biens au niveau supérieur (pas de header société redondant)
   if (activeSoc !== 'all') {
-    const bienMap = new Map<string, SocEntry>()
-    const general: Tache[] = []
-    for (const t of taches) {
-      if (t.bien_id && t.bien) {
-        if (!bienMap.has(t.bien_id)) bienMap.set(t.bien_id, { name: t.bien.name, tasks: [] })
-        bienMap.get(t.bien_id)!.tasks.push(t)
-      } else {
-        general.push(t)
-      }
-    }
+    const { biens, general } = splitByBien(taches)
     return (
       <div className="tscroll">
-        {[...bienMap.entries()].map(([id, bien]) => (
-          <SocGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
+        {biens.map(([id, bien]) => (
+          <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
         ))}
         {general.length > 0 && (
-          <SocGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
+          <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
         )}
       </div>
     )
   }
 
-  // Vue personnelle : grouper par société
+  // Vue personnelle : société → biens
   if (activeOwner !== 'all') {
+    const socMap = new Map<string, Entry>()
+    for (const t of taches) {
+      const id = t.societe_id
+      if (!socMap.has(id)) socMap.set(id, { name: t.societe?.name ?? '—', tasks: [] })
+      socMap.get(id)!.tasks.push(t)
+    }
     return (
       <div className="tscroll">
-        {groupBySoc(taches).map(([id, soc]) => (
+        {[...socMap.entries()].map(([id, soc]) => (
           <SocGroup key={id} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
         ))}
       </div>
     )
   }
 
-  // Vue "tout" : regrouper par propriétaire → société
-  const owners = new Map<string, { name: string; color: string; socs: Map<string, SocEntry> }>()
+  // Vue tout : propriétaire → société → biens
+  const owners = new Map<string, { name: string; color: string; socs: Map<string, Entry> }>()
   for (const t of taches) {
     const ownerId = t.societe?.owner?.id ?? '__'
     if (!owners.has(ownerId)) {
       owners.set(ownerId, {
-        name:  t.societe?.owner?.name    ?? '—',
+        name:  t.societe?.owner?.name     ?? '—',
         color: t.societe?.owner?.color_css ?? '#9CA3AF',
         socs:  new Map(),
       })

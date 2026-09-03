@@ -268,6 +268,19 @@ button { font-family: inherit; }
 .soc-pill.ov { color: var(--danger); background: rgba(220,38,38,.09); }
 .soc-pill.td { color: var(--warn);   background: rgba(217,119,6,.09); }
 
+.grp-bien { margin-bottom: 10px; margin-left: 12px; }
+.grp-bien-hd {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 3px 0 5px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+.grp-bien-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px; font-weight: 600; color: var(--tx2);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+
 /* ── MODAL ──────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 100;
