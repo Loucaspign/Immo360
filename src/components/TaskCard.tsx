@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { Tache } from '../types'
 import { getDisplayStatus, formatDue, formatAmount } from '../lib/utils'
 import { supabase } from '../lib/supabase'
@@ -16,24 +16,23 @@ interface Props {
 }
 
 export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
-  const [marking, setMarking] = useState(false)
+  const [localDone, setLocalDone] = useState(t.status === 'done')
+  useEffect(() => { setLocalDone(t.status === 'done') }, [t.status])
 
   const ds      = getDisplayStatus(t.status, t.due_date)
-  const isDone  = t.status === 'done'
   const profile = t.societe?.owner
 
   async function toggleDone(e: React.MouseEvent) {
     e.stopPropagation()
-    if (marking) return
-    setMarking(true)
-    await supabase.from('taches').update({ status: isDone ? 'todo' : 'done' }).eq('id', t.id)
+    const next = !localDone
+    setLocalDone(next)
+    await supabase.from('taches').update({ status: next ? 'done' : 'todo' }).eq('id', t.id)
     onRefresh()
-    setMarking(false)
   }
 
   return (
     <div className="tc">
-      <div className={`tchk${isDone ? ' done' : ''}`} onClick={toggleDone}>
+      <div className={`tchk${localDone ? ' done' : ''}`} onClick={toggleDone}>
         <svg className="chk-svg" viewBox="0 0 10 8" aria-hidden="true">
           <polyline points="1,4 3.5,7 9,1" />
         </svg>
@@ -70,8 +69,8 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
 
         {t.notes && <div className="tc-note">{t.notes}</div>}
         <div className="tc-acts">
-          <button className="ta-btn p" onClick={toggleDone} disabled={marking}>
-            {marking ? '…' : isDone ? '↩ Rouvrir' : '✓ Marquer fait'}
+          <button className="ta-btn p" onClick={toggleDone}>
+            {localDone ? '↩ Rouvrir' : '✓ Marquer fait'}
           </button>
           <button className="ta-btn" onClick={e => { e.stopPropagation(); onEdit(t) }}>✎ Modifier</button>
         </div>
