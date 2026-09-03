@@ -5,6 +5,7 @@ import type { Profile, Societe, Bien, Tache } from './types'
 import { LoginScreen } from './components/LoginScreen'
 import { Sidebar } from './components/Sidebar'
 import { TaskList } from './components/TaskList'
+import { NewTaskModal } from './components/NewTaskModal'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -15,9 +16,10 @@ export default function App() {
   const [biens, setBiens] = useState<Bien[]>([])
   const [taches, setTaches] = useState<Tache[]>([])
 
-  const [activeOwner, setActiveOwner] = useState('all')
-  const [activeSoc, setActiveSoc]     = useState('all')
-  const [activeBien, setActiveBien]   = useState('all')
+  const [activeOwner, setActiveOwner]   = useState('all')
+  const [activeSoc, setActiveSoc]       = useState('all')
+  const [activeBien, setActiveBien]     = useState('all')
+  const [showNewTask, setShowNewTask]   = useState(false)
 
   // Auth
   useEffect(() => {
@@ -116,11 +118,22 @@ export default function App() {
                 )}
               </div>
             </div>
-            <button className="btn-new">+ Nouvelle tâche</button>
+            <button className="btn-new" onClick={() => setShowNewTask(true)}>+ Nouvelle tâche</button>
           </div>
         </div>
         <TaskList taches={filteredTaches} onRefresh={loadData} />
       </main>
+
+      <NewTaskModal
+        open={showNewTask}
+        onClose={() => setShowNewTask(false)}
+        onCreated={loadData}
+        societes={societes}
+        biens={biens}
+        userId={session.user.id}
+        defaultSoc={activeSoc  !== 'all' ? activeSoc  : ''}
+        defaultBien={activeBien !== 'all' ? activeBien : ''}
+      />
     </div>
   )
 }
