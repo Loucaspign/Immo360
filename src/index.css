@@ -226,8 +226,8 @@ button { font-family: inherit; }
 .ta-btn.p { background: var(--uL); border-color: var(--uL); color: #fff; }
 .ta-btn.p:hover:not(:disabled) { opacity: .82; }
 .ta-btn:disabled { opacity: .5; cursor: default; }
-.ta-btn-del { width: 30px; height: 30px; border: 1px solid transparent; background: transparent; border-radius: 7px; cursor: pointer; color: var(--tx3); display: grid; place-items: center; transition: all .1s; margin-left: auto; padding: 0; flex-shrink: 0; }
-.ta-btn-del:hover { background: var(--danger-bg); color: var(--danger); }
+.ta-btn-del { width: 30px; height: 30px; border: 1px solid var(--border); background: var(--sunken); border-radius: 7px; cursor: pointer; color: var(--tx3); display: grid; place-items: center; transition: all .1s; margin-left: auto; padding: 0; flex-shrink: 0; }
+.ta-btn-del:hover { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
 
 /* ── CARD STATUS (direct, sans groupe parent) ───────────────── */
 .tc.tc-overdue::before  { background: var(--danger); }
@@ -272,14 +272,24 @@ button { font-family: inherit; }
 .grp-bien-hd {
   display: flex; align-items: baseline; gap: 8px;
   padding: 3px 0 5px;
-  border-bottom: 1px solid var(--border);
   margin-bottom: 4px;
 }
 .grp-bien-name {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px; font-weight: 600; color: var(--tx2);
-  text-transform: uppercase; letter-spacing: 0.04em;
+  font-size: 11px; font-weight: 600; color: var(--tx3);
+  text-transform: uppercase; letter-spacing: 0.06em;
 }
+.grp-done-hd {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 0 5px;
+  margin-top: 6px;
+}
+.grp-done-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px; font-weight: 600; color: var(--tx3);
+  text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+}
+.grp-done-line { flex: 1; height: 1px; background: var(--border); }
 
 /* ── MODAL ──────────────────────────────────────────────────── */
 .modal-overlay {

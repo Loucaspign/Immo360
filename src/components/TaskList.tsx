@@ -22,6 +22,21 @@ function sortTasks(tasks: Tache[]): Tache[] {
   })
 }
 
+function DoneSection({ tasks, onRefresh, onEdit }: { tasks: Tache[] } & Pick<Props, 'onRefresh' | 'onEdit'>) {
+  if (tasks.length === 0) return null
+  return (
+    <>
+      <div className="grp-done-hd">
+        <span className="grp-done-label">Terminées ({tasks.length})</span>
+        <span className="grp-done-line" />
+      </div>
+      {tasks.map(t => (
+        <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
+      ))}
+    </>
+  )
+}
+
 function StatusPills({ tasks }: { tasks: Tache[] }) {
   const ov = tasks.filter(t => getDisplayStatus(t.status, t.due_date) === 'overdue').length
   const td = tasks.filter(t => getDisplayStatus(t.status, t.due_date) === 'today').length
@@ -51,41 +66,53 @@ function splitByBien(tasks: Tache[]): { biens: [string, Entry][]; general: Tache
 }
 
 function BienGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
+  const active = tasks.filter(t => t.status !== 'done')
+  const done   = tasks.filter(t => t.status === 'done')
   return (
     <div className="grp-bien">
       <div className="grp-bien-hd">
         <span className="grp-bien-name">{name}</span>
         <StatusPills tasks={tasks} />
       </div>
-      {sortTasks(tasks).map(t => (
+      {sortTasks(active).map(t => (
         <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
       ))}
+      <DoneSection tasks={done} onRefresh={onRefresh} onEdit={onEdit} />
     </div>
   )
 }
 
 function SocGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
   const { biens, general } = splitByBien(tasks)
+  const hasBiens = biens.length > 0
+  if (hasBiens) {
+    return (
+      <div className="grp-soc">
+        <div className="grp-soc-hd">
+          <span className="grp-soc-name">{name}</span>
+          <StatusPills tasks={tasks} />
+        </div>
+        {biens.map(([id, bien]) => (
+          <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
+        ))}
+        {general.length > 0 && (
+          <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
+        )}
+      </div>
+    )
+  }
+  const active = tasks.filter(t => t.status !== 'done')
+  const done   = tasks.filter(t => t.status === 'done')
   return (
     <div className="grp-soc">
       <div className="grp-soc-hd">
         <span className="grp-soc-name">{name}</span>
         <StatusPills tasks={tasks} />
       </div>
-      {biens.length > 0 ? (
-        <>
-          {biens.map(([id, bien]) => (
-            <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
-          ))}
-          {general.length > 0 && (
-            <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
-          )}
-        </>
-      ) : (
-        sortTasks(tasks).map(t => (
-          <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
-        ))
-      )}
+      {sortTasks(active).map(t => (
+        <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
+      ))}
+      <DoneSection tasks={done} onRefresh={onRefresh} onEdit={onEdit} />
     </div>
   )
 }
