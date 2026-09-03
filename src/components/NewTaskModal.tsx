@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Societe, Bien, Category } from '../types'
+import type { Societe, Bien, Category, Tache } from '../types'
 import { supabase } from '../lib/supabase'
 
 interface Props {
   open:         boolean
   onClose:      () => void
-  onCreated:    () => void
+  onSaved:      () => void
   societes:     Societe[]
   biens:        Bien[]
   userId:       string
   defaultSoc?:  string
   defaultBien?: string
+  editTache?:   Tache        // présent = mode édition
 }
 
 const CATS: { key: Category; label: string }[] = [
@@ -21,11 +22,13 @@ const CATS: { key: Category; label: string }[] = [
 ]
 
 export function NewTaskModal({
-  open, onClose, onCreated, societes, biens, userId,
-  defaultSoc = '', defaultBien = '',
+  open, onClose, onSaved, societes, biens, userId,
+  defaultSoc = '', defaultBien = '', editTache,
 }: Props) {
-  const [socId,    setSocId]    = useState(defaultSoc)
-  const [bienId,   setBienId]   = useState(defaultBien)
+  const isEdit = !!editTache
+
+  const [socId,    setSocId]    = useState('')
+  const [bienId,   setBienId]   = useState('')
   const [title,    setTitle]    = useState('')
   const [category, setCategory] = useState<Category>('admin')
   const [dueDate,  setDueDate]  = useState('')
@@ -37,13 +40,29 @@ export function NewTaskModal({
 
   useEffect(() => {
     if (!open) return
-    setSocId(defaultSoc)
-    setBienId(defaultBien)
-    setTitle(''); setCategory('admin'); setDueDate(''); setAmount(''); setNotes(''); setError(null)
+    if (isEdit && editTache) {
+      setSocId(editTache.societe_id)
+      setBienId(editTache.bien_id ?? '')
+      setTitle(editTache.title)
+      setCategory(editTache.category)
+      setDueDate(editTache.due_date ?? '')
+      setAmount(editTache.amount != null ? String(editTache.amount) : '')
+      setNotes(editTache.notes ?? '')
+    } else {
+      setSocId(defaultSoc)
+      setBienId(defaultBien)
+      setTitle(''); setCategory('admin'); setDueDate(''); setAmount(''); setNotes('')
+    }
+    setError(null)
     setTimeout(() => titleRef.current?.focus(), 60)
-  }, [open, defaultSoc, defaultBien])
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { setBienId('') }, [socId])
+  // Réinitialise bien si société change (seulement en création)
+  const prevSocRef = useRef(socId)
+  useEffect(() => {
+    if (!isEdit && prevSocRef.current !== socId) setBienId('')
+    prevSocRef.current = socId
+  }, [socId, isEdit])
 
   useEffect(() => {
     if (!open) return
@@ -58,7 +77,8 @@ export function NewTaskModal({
     e.preventDefault()
     if (!socId || !title.trim()) return
     setSaving(true); setError(null)
-    const { error } = await supabase.from('taches').insert({
+
+    const payload = {
       societe_id: socId,
       bien_id:    bienId || null,
       title:      title.trim(),
@@ -66,11 +86,15 @@ export function NewTaskModal({
       due_date:   dueDate || null,
       amount:     amount ? parseFloat(amount) : null,
       notes:      notes.trim() || null,
-      created_by: userId,
-    })
+    }
+
+    const { error } = isEdit
+      ? await supabase.from('taches').update(payload).eq('id', editTache!.id)
+      : await supabase.from('taches').insert({ ...payload, created_by: userId })
+
     setSaving(false)
     if (error) { setError(error.message); return }
-    onCreated()
+    onSaved()
     onClose()
   }
 
@@ -80,7 +104,7 @@ export function NewTaskModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="modal-hdr">
-          <span className="modal-title">Nouvelle tâche</span>
+          <span className="modal-title">{isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'}</span>
           <button className="modal-close" onClick={onClose} aria-label="Fermer">✕</button>
         </div>
 
@@ -153,7 +177,7 @@ export function NewTaskModal({
           <div className="modal-actions">
             <button type="button" className="btn-cancel" onClick={onClose}>Annuler</button>
             <button type="submit" className="btn-save" disabled={saving || !socId || !title.trim()}>
-              {saving ? 'Enregistrement…' : 'Créer la tâche'}
+              {saving ? 'Enregistrement…' : isEdit ? 'Enregistrer' : 'Créer la tâche'}
             </button>
           </div>
         </form>

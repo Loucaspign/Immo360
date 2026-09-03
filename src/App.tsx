@@ -20,6 +20,7 @@ export default function App() {
   const [activeSoc, setActiveSoc]       = useState('all')
   const [activeBien, setActiveBien]     = useState('all')
   const [showNewTask, setShowNewTask]   = useState(false)
+  const [editTache,   setEditTache]     = useState<import('./types').Tache | undefined>()
 
   // Auth
   useEffect(() => {
@@ -121,18 +122,23 @@ export default function App() {
             <button className="btn-new" onClick={() => setShowNewTask(true)}>+ Nouvelle tâche</button>
           </div>
         </div>
-        <TaskList taches={filteredTaches} onRefresh={loadData} />
+        <TaskList
+          taches={filteredTaches}
+          onRefresh={loadData}
+          onEdit={t => { setEditTache(t); setShowNewTask(true) }}
+        />
       </main>
 
       <NewTaskModal
         open={showNewTask}
-        onClose={() => setShowNewTask(false)}
-        onCreated={loadData}
+        onClose={() => { setShowNewTask(false); setEditTache(undefined) }}
+        onSaved={loadData}
         societes={societes}
         biens={biens}
         userId={session.user.id}
         defaultSoc={activeSoc  !== 'all' ? activeSoc  : ''}
         defaultBien={activeBien !== 'all' ? activeBien : ''}
+        editTache={editTache}
       />
     </div>
   )

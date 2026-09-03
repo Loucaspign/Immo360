@@ -10,11 +10,12 @@ const CATS: Record<string, string> = {
 const DUE_CLS: Record<string, string> = { overdue: 'ov', today: 'td' }
 
 interface Props {
-  tache:     Tache
+  tache:    Tache
   onRefresh: () => void
+  onEdit:   (t: Tache) => void
 }
 
-export function TaskCard({ tache: t, onRefresh }: Props) {
+export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [marking, setMarking]   = useState(false)
 
@@ -80,7 +81,7 @@ export function TaskCard({ tache: t, onRefresh }: Props) {
                 {marking ? '…' : isDone ? '↩ Rouvrir' : '✓ Marquer fait'}
               </button>
               <button className="ta-btn" onClick={e => e.stopPropagation()}>⏱ Reporter</button>
-              <button className="ta-btn" onClick={e => e.stopPropagation()}>✎ Modifier</button>
+              <button className="ta-btn" onClick={e => { e.stopPropagation(); onEdit(t) }}>✎ Modifier</button>
             </div>
           </div>
         )}

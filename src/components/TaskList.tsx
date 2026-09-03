@@ -5,6 +5,7 @@ import { TaskCard } from './TaskCard'
 interface Props {
   taches:    Tache[]
   onRefresh: () => void
+  onEdit:    (t: Tache) => void
 }
 
 const GROUPS = [
@@ -15,7 +16,7 @@ const GROUPS = [
   { key: 'done'     as const, cls: 'dn', label: 'Terminés'           },
 ]
 
-export function TaskList({ taches, onRefresh }: Props) {
+export function TaskList({ taches, onRefresh, onEdit }: Props) {
   if (taches.length === 0) {
     return (
       <div className="tscroll">
@@ -37,7 +38,7 @@ export function TaskList({ taches, onRefresh }: Props) {
               <div className="grp-cnt">{tasks.length}</div>
             </div>
             {tasks.map(t => (
-              <TaskCard key={t.id} tache={t} onRefresh={onRefresh} />
+              <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
             ))}
           </div>
         )
