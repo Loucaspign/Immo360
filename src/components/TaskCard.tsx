@@ -22,11 +22,11 @@ export function TaskCard({ tache: t, onRefresh }: Props) {
   const isDone  = t.status === 'done'
   const profile = t.societe?.owner
 
-  async function markDone(e: React.MouseEvent) {
+  async function toggleDone(e: React.MouseEvent) {
     e.stopPropagation()
-    if (marking || isDone) return
+    if (marking) return
     setMarking(true)
-    await supabase.from('taches').update({ status: 'done' }).eq('id', t.id)
+    await supabase.from('taches').update({ status: isDone ? 'todo' : 'done' }).eq('id', t.id)
     onRefresh()
     setMarking(false)
   }
@@ -37,7 +37,7 @@ export function TaskCard({ tache: t, onRefresh }: Props) {
 
   return (
     <div className={`tc${expanded ? ' expanded' : ''}`} onClick={toggleExpand}>
-      <div className={`tchk${isDone ? ' done' : ''}`} onClick={markDone}>
+      <div className={`tchk${isDone ? ' done' : ''}`} onClick={toggleDone}>
         <svg className="chk-svg" viewBox="0 0 10 8" aria-hidden="true">
           <polyline points="1,4 3.5,7 9,1" />
         </svg>
@@ -76,11 +76,9 @@ export function TaskCard({ tache: t, onRefresh }: Props) {
           <div className="tc-detail">
             <div className="tc-note">{t.notes}</div>
             <div className="tc-acts">
-              {!isDone && (
-                <button className="ta-btn p" onClick={markDone} disabled={marking}>
-                  {marking ? '…' : '✓ Marquer fait'}
-                </button>
-              )}
+              <button className="ta-btn p" onClick={toggleDone} disabled={marking}>
+                {marking ? '…' : isDone ? '↩ Rouvrir' : '✓ Marquer fait'}
+              </button>
               <button className="ta-btn" onClick={e => e.stopPropagation()}>⏱ Reporter</button>
               <button className="ta-btn" onClick={e => e.stopPropagation()}>✎ Modifier</button>
             </div>
