@@ -30,6 +30,13 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
     onRefresh()
   }
 
+  async function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!window.confirm(`Supprimer « ${t.title} » ?`)) return
+    await supabase.from('taches').delete().eq('id', t.id)
+    onRefresh()
+  }
+
   return (
     <div className={`tc tc-${ds}`}>
       <div className={`tchk${localDone ? ' done' : ''}`} onClick={toggleDone}>
@@ -73,6 +80,11 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
             {localDone ? '↩ Rouvrir' : '✓ Marquer fait'}
           </button>
           <button className="ta-btn" onClick={e => { e.stopPropagation(); onEdit(t) }}>✎ Modifier</button>
+          <button className="ta-btn-del" onClick={handleDelete} title="Supprimer">
+            <svg viewBox="0 0 14 16" width="13" height="14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M1 4h12M4.5 4V2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5V4M2.5 4l.7 9a1 1 0 0 0 1 .9h5.6a1 1 0 0 0 1-.9l.7-9M5.5 7.5v4M8.5 7.5v4" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
