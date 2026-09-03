@@ -174,7 +174,7 @@ export default function App() {
               </div>
             </div>
           </div>
-          <ComptaView societes={societes} />
+          <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} />
         </>}
       </main>
 

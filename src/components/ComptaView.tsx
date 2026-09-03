@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Societe, ComptaTemplate, ComptaEntry } from '../types'
+import type { Societe, Profile, ComptaTemplate, ComptaEntry } from '../types'
 import { ComptaTemplateModal } from './ComptaTemplateModal'
 
 const FR_MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
@@ -54,7 +54,13 @@ function IconTrash() {
   )
 }
 
-export function ComptaView({ societes }: { societes: Societe[] }) {
+interface Props {
+  societes:    Societe[]
+  profiles:    Profile[]
+  activeOwner: string
+}
+
+export function ComptaView({ societes, profiles, activeOwner }: Props) {
   const [templates,   setTemplates]   = useState<ComptaTemplate[]>([])
   const [entries,     setEntries]     = useState<ComptaEntry[]>([])
   const [year,        setYear]        = useState(new Date().getFullYear())
@@ -103,9 +109,73 @@ export function ComptaView({ societes }: { societes: Societe[] }) {
 
   const doneSet = new Set(entries.map(e => `${e.template_id}::${e.period_key}`))
 
-  const socWithTemplates = societes.filter(s => templates.some(t => t.societe_id === s.id))
-  const socWithout       = societes.filter(s => !templates.some(t => t.societe_id === s.id))
-  const ordered          = [...socWithTemplates, ...socWithout]
+  // Filter societes by active owner
+  const visibleSocs = activeOwner === 'all'
+    ? societes
+    : societes.filter(s => s.owner_id === activeOwner)
+
+  // Group by owner when "tout voir"
+  const groups: { profile: Profile | null; socs: Societe[] }[] =
+    activeOwner !== 'all'
+      ? [{ profile: null, socs: visibleSocs }]
+      : profiles.map(p => ({ profile: p, socs: visibleSocs.filter(s => s.owner_id === p.id) }))
+               .filter(g => g.socs.length > 0)
+
+  function renderSoc(soc: Societe) {
+    const socTmpls = templates.filter(t => t.societe_id === soc.id)
+    return (
+      <div key={soc.id} className="ct-soc">
+        <div className="ct-soc-hd">
+          <div className="ct-soc-dot" style={{ background: soc.owner?.color_css }} />
+          <span className="ct-soc-name">{soc.name}</span>
+          <button
+            className="ct-add-btn"
+            onClick={() => { setDefaultSoc(soc.id); setEditTmpl(undefined); setShowModal(true) }}
+          >
+            + Obligation
+          </button>
+        </div>
+
+        {socTmpls.length === 0 ? (
+          <p className="ct-empty">Aucune obligation configurée</p>
+        ) : (
+          <div className="ct-table">
+            {socTmpls.map(tmpl => {
+              const periods = getPeriods(tmpl, year)
+              return (
+                <div key={tmpl.id} className="ct-row">
+                  <div className="ct-row-info">
+                    <span className="ct-row-name">{tmpl.label}</span>
+                    <span className="ct-row-freq">{tmpl.frequency}</span>
+                  </div>
+                  <div className="ct-chips">
+                    {periods.map(p => {
+                      const dk   = `${tmpl.id}::${p.key}`
+                      const done = doneSet.has(dk)
+                      const late = !done && p.dueDate < today
+                      const soon = !done && !late && p.dueDate <= soonDate
+                      const cls  = `ct-chip${done ? ' done' : late ? ' late' : soon ? ' soon' : ''}`
+                      return (
+                        <button key={p.key} className={cls} onClick={() => toggle(tmpl, p.key)}
+                          title={`Échéance : ${p.dueDate}`} disabled={toggling === dk}>
+                          {done && <svg viewBox="0 0 10 8" width="10" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4l3 3 5-6"/></svg>}
+                          {p.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="ct-row-acts">
+                    <button className="ct-act-btn" onClick={() => { setEditTmpl(tmpl); setShowModal(true) }} title="Modifier"><IconPencil /></button>
+                    <button className="ct-act-btn danger" onClick={() => deleteTmpl(tmpl)} title="Supprimer"><IconTrash /></button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="ct-scroll">
@@ -117,66 +187,17 @@ export function ComptaView({ societes }: { societes: Societe[] }) {
         </div>
       </div>
 
-      {ordered.map(soc => {
-        const socTmpls = templates.filter(t => t.societe_id === soc.id)
-        return (
-          <div key={soc.id} className="ct-soc">
-            <div className="ct-soc-hd">
-              <div className="ct-soc-dot" style={{ background: soc.owner?.color_css }} />
-              <span className="ct-soc-name">{soc.name}</span>
-              <button
-                className="ct-add-btn"
-                onClick={() => { setDefaultSoc(soc.id); setEditTmpl(undefined); setShowModal(true) }}
-              >
-                + Obligation
-              </button>
+      {groups.map((g, i) => (
+        <div key={g.profile?.id ?? i}>
+          {g.profile && (
+            <div className="grp-owner-hd" style={{ marginBottom: 12 }}>
+              <div className="grp-owner-dot" style={{ background: g.profile.color_css }} />
+              <span className="grp-owner-name">{g.profile.name}</span>
             </div>
-
-            {socTmpls.length === 0 ? (
-              <p className="ct-empty">Aucune obligation configurée</p>
-            ) : (
-              <div className="ct-table">
-                {socTmpls.map(tmpl => {
-                  const periods = getPeriods(tmpl, year)
-                  return (
-                    <div key={tmpl.id} className="ct-row">
-                      <div className="ct-row-info">
-                        <span className="ct-row-name">{tmpl.label}</span>
-                        <span className="ct-row-freq">{tmpl.frequency}</span>
-                      </div>
-                      <div className="ct-chips">
-                        {periods.map(p => {
-                          const dk    = `${tmpl.id}::${p.key}`
-                          const done  = doneSet.has(dk)
-                          const late  = !done && p.dueDate < today
-                          const soon  = !done && !late && p.dueDate <= soonDate
-                          const cls   = `ct-chip${done ? ' done' : late ? ' late' : soon ? ' soon' : ''}`
-                          return (
-                            <button
-                              key={p.key}
-                              className={cls}
-                              onClick={() => toggle(tmpl, p.key)}
-                              title={`Échéance : ${p.dueDate}`}
-                              disabled={toggling === dk}
-                            >
-                              {done && <svg viewBox="0 0 10 8" width="10" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4l3 3 5-6"/></svg>}
-                              {p.label}
-                            </button>
-                          )
-                        })}
-                      </div>
-                      <div className="ct-row-acts">
-                        <button className="ct-act-btn" onClick={() => { setEditTmpl(tmpl); setShowModal(true) }} title="Modifier"><IconPencil /></button>
-                        <button className="ct-act-btn danger" onClick={() => deleteTmpl(tmpl)} title="Supprimer"><IconTrash /></button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )
-      })}
+          )}
+          {g.socs.map(renderSoc)}
+        </div>
+      ))}
 
       {showModal && (
         <ComptaTemplateModal
