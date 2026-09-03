@@ -12,7 +12,8 @@ export function QuickList({ userId }: { userId: string }) {
   const [items,  setItems]  = useState<Item[]>([])
   const [adding, setAdding] = useState(false)
   const [draft,  setDraft]  = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef   = useRef<HTMLInputElement>(null)
+  const committingRef = useRef(false)   // guard against blur firing after Enter
 
   const today = new Date().toISOString().slice(0, 10)
 
@@ -22,7 +23,10 @@ export function QuickList({ userId }: { userId: string }) {
       .select('id, text, position, checked_date')
       .eq('user_id', userId)
       .order('position')
-      .then(({ data }) => { if (data) setItems(data) })
+      .then(({ data, error }) => {
+        if (error) console.error('QuickList load:', error)
+        if (data) setItems(data)
+      })
   }, [userId])
 
   useEffect(() => {
@@ -35,18 +39,35 @@ export function QuickList({ userId }: { userId: string }) {
     await supabase.from('quicklist').update({ checked_date: next }).eq('id', item.id)
   }
 
-  async function commit() {
-    const text = draft.trim()
+  async function commit(text: string) {
     setAdding(false)
     setDraft('')
     if (!text) return
     const position = items.length
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('quicklist')
       .insert({ user_id: userId, text, position })
       .select('id, text, position, checked_date')
       .single()
+    if (error) { console.error('QuickList insert:', error); return }
     if (data) setItems(prev => [...prev, data])
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      committingRef.current = true
+      commit(draft.trim())
+    }
+    if (e.key === 'Escape') {
+      committingRef.current = true
+      setAdding(false)
+      setDraft('')
+    }
+  }
+
+  function handleBlur() {
+    if (committingRef.current) { committingRef.current = false; return }
+    commit(draft.trim())
   }
 
   async function remove(e: React.MouseEvent, id: string) {
@@ -74,11 +95,8 @@ export function QuickList({ userId }: { userId: string }) {
             className="ql-input"
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') commit()
-              if (e.key === 'Escape') { setAdding(false); setDraft('') }
-            }}
-            onBlur={commit}
+            onKeyDown={handleKeyDown}
+            onBlur={handleBlur}
             placeholder="Nouveau rappel…"
             maxLength={60}
           />
