@@ -485,7 +485,7 @@ button { font-family: inherit; }
 
 .ct-row-info { width: 200px; flex-shrink: 0; }
 .ct-row-name { font-size: 14px; font-weight: 600; color: var(--tx1); line-height: 1.3; }
-.ct-row-freq { font-size: 11px; color: var(--tx3); text-transform: capitalize; margin-top: 2px; }
+.ct-row-freq { font-size: 11px; color: var(--tx3); text-transform: capitalize; margin-top: 6px; }
 
 .ct-chips { flex: 1; display: flex; flex-wrap: wrap; gap: 5px; }
 .ct-chip {
