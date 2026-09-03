@@ -351,6 +351,25 @@ button { font-family: inherit; }
 .mf-select:disabled { opacity: .45; cursor: not-allowed; }
 .mf-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
 
+.mf-assignees { display: flex; gap: 6px; flex-wrap: wrap; }
+.mf-assignee {
+  display: flex; align-items: center; gap: 7px;
+  border: 1.5px solid var(--border-s); border-radius: 20px;
+  padding: 5px 12px 5px 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; user-select: none; transition: all .1s;
+  color: var(--tx2); background: var(--sunken);
+}
+.mf-assignee-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  background: var(--ac, var(--tx3));
+}
+.mf-assignee:hover { border-color: var(--border-s); background: var(--surface); color: var(--tx1); }
+.mf-assignee.sel {
+  background: color-mix(in srgb, var(--ac, var(--uL)) 10%, transparent);
+  border-color: color-mix(in srgb, var(--ac, var(--uL)) 40%, transparent);
+  color: var(--tx1);
+}
+
 .mf-cats { display: flex; gap: 6px; flex-wrap: wrap; }
 .mf-cat {
   display: flex; align-items: center;

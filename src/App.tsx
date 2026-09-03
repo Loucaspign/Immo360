@@ -41,7 +41,7 @@ export default function App() {
       supabase.from('societes').select('*, owner:profiles(*)').order('name'),
       supabase.from('biens').select('*').order('name'),
       supabase.from('taches')
-        .select('*, societe:societes(*, owner:profiles(*)), bien:biens(*)')
+        .select('*, societe:societes(*, owner:profiles(*)), bien:biens(*), assignee:profiles!assigned_to(*)')
         .order('due_date', { ascending: true, nullsFirst: false }),
     ])
     if (p.data) setProfiles(p.data as Profile[])
@@ -77,9 +77,10 @@ export default function App() {
   if (!session) return <LoginScreen />
 
   const filteredTaches = taches.filter(t => {
-    if (activeOwner !== 'all' && t.societe?.owner_id !== activeOwner) return false
-    if (activeSoc   !== 'all' && t.societe_id !== activeSoc)           return false
-    if (activeBien  !== 'all' && t.bien_id !== activeBien)             return false
+    const effectiveOwner = t.assigned_to ?? t.societe?.owner_id
+    if (activeOwner !== 'all' && effectiveOwner !== activeOwner) return false
+    if (activeSoc   !== 'all' && t.societe_id !== activeSoc)    return false
+    if (activeBien  !== 'all' && t.bien_id !== activeBien)      return false
     return true
   })
 
@@ -135,6 +136,7 @@ export default function App() {
         open={showNewTask}
         onClose={() => { setShowNewTask(false); setEditTache(undefined) }}
         onSaved={loadData}
+        profiles={profiles}
         societes={societes}
         biens={biens}
         userId={session.user.id}

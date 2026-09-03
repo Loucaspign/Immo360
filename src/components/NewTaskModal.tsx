@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Societe, Bien, Category, Tache } from '../types'
+import type { Societe, Bien, Category, Tache, Profile } from '../types'
 import { supabase } from '../lib/supabase'
 
 interface Props {
   open:         boolean
   onClose:      () => void
   onSaved:      () => void
+  profiles:     Profile[]
   societes:     Societe[]
   biens:        Bien[]
   userId:       string
@@ -22,20 +23,21 @@ const CATS: { key: Category; label: string }[] = [
 ]
 
 export function NewTaskModal({
-  open, onClose, onSaved, societes, biens, userId,
+  open, onClose, onSaved, profiles, societes, biens, userId,
   defaultSoc = '', defaultBien = '', editTache,
 }: Props) {
   const isEdit = !!editTache
 
-  const [socId,    setSocId]    = useState('')
-  const [bienId,   setBienId]   = useState('')
-  const [title,    setTitle]    = useState('')
-  const [category, setCategory] = useState<Category>('admin')
-  const [dueDate,  setDueDate]  = useState('')
-  const [amount,   setAmount]   = useState('')
-  const [notes,    setNotes]    = useState('')
-  const [saving,   setSaving]   = useState(false)
-  const [error,    setError]    = useState<string | null>(null)
+  const [socId,      setSocId]      = useState('')
+  const [bienId,     setBienId]     = useState('')
+  const [assignedTo, setAssignedTo] = useState<string>('')
+  const [title,      setTitle]      = useState('')
+  const [category,   setCategory]   = useState<Category>('admin')
+  const [dueDate,    setDueDate]    = useState('')
+  const [amount,     setAmount]     = useState('')
+  const [notes,      setNotes]      = useState('')
+  const [saving,     setSaving]     = useState(false)
+  const [error,      setError]      = useState<string | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -43,6 +45,7 @@ export function NewTaskModal({
     if (isEdit && editTache) {
       setSocId(editTache.societe_id)
       setBienId(editTache.bien_id ?? '')
+      setAssignedTo(editTache.assigned_to ?? '')
       setTitle(editTache.title)
       setCategory(editTache.category)
       setDueDate(editTache.due_date ?? '')
@@ -51,6 +54,7 @@ export function NewTaskModal({
     } else {
       setSocId(defaultSoc)
       setBienId(defaultBien)
+      setAssignedTo('')
       setTitle(''); setCategory('admin'); setDueDate(''); setAmount(''); setNotes('')
     }
     setError(null)
@@ -79,13 +83,14 @@ export function NewTaskModal({
     setSaving(true); setError(null)
 
     const payload = {
-      societe_id: socId,
-      bien_id:    bienId || null,
-      title:      title.trim(),
+      societe_id:  socId,
+      bien_id:     bienId || null,
+      assigned_to: assignedTo || null,
+      title:       title.trim(),
       category,
-      due_date:   dueDate || null,
-      amount:     amount ? parseFloat(amount) : null,
-      notes:      notes.trim() || null,
+      due_date:    dueDate || null,
+      amount:      amount ? parseFloat(amount) : null,
+      notes:       notes.trim() || null,
     }
 
     const { error } = isEdit
@@ -128,6 +133,25 @@ export function NewTaskModal({
                 <option value="">— Aucun —</option>
                 {filteredBiens.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
               </select>
+            </div>
+          </div>
+
+          <div className="mf-group">
+            <label className="mf-label">Assigné à <span className="mf-opt">optionnel</span></label>
+            <div className="mf-assignees">
+              {profiles.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`mf-assignee${assignedTo === p.id ? ' sel' : ''}`}
+                  style={{ '--ac': p.color_css } as React.CSSProperties}
+                  onClick={() => setAssignedTo(prev => prev === p.id ? '' : p.id)}
+                  title={p.name}
+                >
+                  <span className="mf-assignee-dot" />
+                  {p.name}
+                </button>
+              ))}
             </div>
           </div>
 

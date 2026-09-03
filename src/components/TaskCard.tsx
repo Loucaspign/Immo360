@@ -19,8 +19,9 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
   const [localDone, setLocalDone] = useState(t.status === 'done')
   useEffect(() => { setLocalDone(t.status === 'done') }, [t.status])
 
-  const ds      = getDisplayStatus(localDone ? 'done' : 'todo', t.due_date)
-  const profile = t.societe?.owner
+  const ds       = getDisplayStatus(localDone ? 'done' : 'todo', t.due_date)
+  const owner    = t.societe?.owner
+  const profile  = t.assignee ?? owner
 
   async function toggleDone(e: React.MouseEvent) {
     e.stopPropagation()
@@ -47,7 +48,7 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
 
       <div className="tc-body">
         <div className="tc-crumb">
-          <span className="tc-soc" style={{ color: profile?.color_css }}>
+          <span className="tc-soc" style={{ color: owner?.color_css }}>
             {t.societe?.name}
           </span>
           {t.bien && (

@@ -88,6 +88,12 @@ create trigger taches_touch_updated_at
   for each row execute procedure public.touch_updated_at();
 
 
+-- ── Migration : assignation de tâche ─────────────────────────
+-- À exécuter dans l'éditeur SQL Supabase si la table existe déjà
+alter table public.taches
+  add column if not exists assigned_to uuid references public.profiles(id) on delete set null;
+
+
 -- ══════════════════════════════════════════════════════════════
 --  Données de départ — à adapter avec les vrais UUIDs des comptes
 --  Créer d'abord les 3 comptes via Supabase Dashboard → Authentication

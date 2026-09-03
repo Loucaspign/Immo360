@@ -30,6 +30,7 @@ export interface Tache {
   id:          string
   societe_id:  string
   bien_id:     string | null
+  assigned_to: string | null
   title:       string
   notes:       string | null
   category:    Category
@@ -42,4 +43,5 @@ export interface Tache {
   updated_at:  string
   societe:     Societe
   bien:        Bien | null
+  assignee:    Profile | null
 }
