@@ -17,13 +17,23 @@ interface Props {
   onSignOut:     () => void
   onRefresh:     () => void
   onAddSociete:  (ownerId: string) => void
+  onEditSociete: (s: Societe) => void
   onAddBien:     (societeId: string) => void
+  onEditBien:    (b: Bien) => void
 }
 
 function IconPlus() {
   return (
     <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
       <path d="M5 1v8M1 5h8" />
+    </svg>
+  )
+}
+
+function IconPencil() {
+  return (
+    <svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9.5 1.5l3 3L4 13H1v-3L9.5 1.5z" />
     </svg>
   )
 }
@@ -40,7 +50,7 @@ export function Sidebar({
   profiles, societes, biens, taches,
   activeOwner, activeSoc, activeBien,
   onOwnerChange, onSocChange, onBienChange, onSignOut,
-  onRefresh, onAddSociete, onAddBien,
+  onRefresh, onAddSociete, onEditSociete, onAddBien, onEditBien,
 }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -134,6 +144,13 @@ export function Sidebar({
                       {count > 0 && <div className="soc-badge">{count}</div>}
                       <button
                         className="sb-del-btn"
+                        onClick={e => { e.stopPropagation(); onEditSociete(s) }}
+                        title="Modifier"
+                      >
+                        <IconPencil />
+                      </button>
+                      <button
+                        className="sb-del-btn"
                         onClick={e => deleteSociete(e, s)}
                         title="Supprimer"
                       >
@@ -158,6 +175,13 @@ export function Sidebar({
                               <span className="bien-name">{b.name}</span>
                               <span className="bien-lots">{b.lots_count} lot{b.lots_count > 1 ? 's' : ''}</span>
                               {bCnt > 0 && <span className="bien-badge">{bCnt}</span>}
+                              <button
+                                className="sb-del-btn"
+                                onClick={e => { e.stopPropagation(); onEditBien(b) }}
+                                title="Modifier"
+                              >
+                                <IconPencil />
+                              </button>
                               <button
                                 className="sb-del-btn"
                                 onClick={e => deleteBien(e, b)}

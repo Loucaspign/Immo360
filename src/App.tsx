@@ -25,8 +25,10 @@ export default function App() {
   const [editTache,     setEditTache]     = useState<import('./types').Tache | undefined>()
   const [showSocModal,  setShowSocModal]  = useState(false)
   const [socOwnerDef,   setSocOwnerDef]   = useState('')
+  const [editSociete,   setEditSociete]   = useState<import('./types').Societe | undefined>()
   const [showBienModal, setShowBienModal] = useState(false)
   const [bienSocDef,    setBienSocDef]    = useState('')
+  const [editBien,      setEditBien]      = useState<import('./types').Bien | undefined>()
 
   // Auth
   useEffect(() => {
@@ -114,8 +116,10 @@ export default function App() {
         onBienChange={setActiveBien}
         onSignOut={() => supabase.auth.signOut()}
         onRefresh={loadData}
-        onAddSociete={ownerId => { setSocOwnerDef(ownerId); setShowSocModal(true) }}
-        onAddBien={socId => { setBienSocDef(socId); setShowBienModal(true) }}
+        onAddSociete={ownerId => { setSocOwnerDef(ownerId); setEditSociete(undefined); setShowSocModal(true) }}
+        onEditSociete={s => { setEditSociete(s); setShowSocModal(true) }}
+        onAddBien={socId => { setBienSocDef(socId); setEditBien(undefined); setShowBienModal(true) }}
+        onEditBien={b => { setEditBien(b); setShowBienModal(true) }}
       />
       <main className="main">
         <div className="mhdr">
@@ -156,18 +160,20 @@ export default function App() {
 
       <SocieteModal
         open={showSocModal}
-        onClose={() => setShowSocModal(false)}
+        onClose={() => { setShowSocModal(false); setEditSociete(undefined) }}
         onSaved={loadData}
         profiles={profiles}
         defaultOwner={socOwnerDef}
+        editSociete={editSociete}
       />
 
       <BienModal
         open={showBienModal}
-        onClose={() => setShowBienModal(false)}
+        onClose={() => { setShowBienModal(false); setEditBien(undefined) }}
         onSaved={loadData}
         societes={societes}
         defaultSoc={bienSocDef}
+        editBien={editBien}
       />
     </div>
   )
