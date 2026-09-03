@@ -125,6 +125,7 @@ export default function App() {
         <TaskList
           taches={filteredTaches}
           activeOwner={activeOwner}
+          activeSoc={activeSoc}
           onRefresh={loadData}
           onEdit={t => { setEditTache(t); setShowNewTask(true) }}
         />

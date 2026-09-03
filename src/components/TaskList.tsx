@@ -5,6 +5,7 @@ import { TaskCard } from './TaskCard'
 interface Props {
   taches:      Tache[]
   activeOwner: string
+  activeSoc:   string
   onRefresh:   () => void
   onEdit:      (t: Tache) => void
 }
@@ -59,7 +60,7 @@ function groupBySoc(tasks: Tache[]): [string, SocEntry][] {
   return [...map.entries()]
 }
 
-export function TaskList({ taches, activeOwner, onRefresh, onEdit }: Props) {
+export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: Props) {
   if (taches.length === 0) {
     return (
       <div className="tscroll">
@@ -68,6 +69,31 @@ export function TaskList({ taches, activeOwner, onRefresh, onEdit }: Props) {
     )
   }
 
+  // Vue société : grouper par bien
+  if (activeSoc !== 'all') {
+    const bienMap = new Map<string, SocEntry>()
+    const general: Tache[] = []
+    for (const t of taches) {
+      if (t.bien_id && t.bien) {
+        if (!bienMap.has(t.bien_id)) bienMap.set(t.bien_id, { name: t.bien.name, tasks: [] })
+        bienMap.get(t.bien_id)!.tasks.push(t)
+      } else {
+        general.push(t)
+      }
+    }
+    return (
+      <div className="tscroll">
+        {[...bienMap.entries()].map(([id, bien]) => (
+          <SocGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
+        ))}
+        {general.length > 0 && (
+          <SocGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
+        )}
+      </div>
+    )
+  }
+
+  // Vue personnelle : grouper par société
   if (activeOwner !== 'all') {
     return (
       <div className="tscroll">
