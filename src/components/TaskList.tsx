@@ -22,21 +22,6 @@ function sortTasks(tasks: Tache[]): Tache[] {
   })
 }
 
-function DoneSection({ tasks, onRefresh, onEdit }: { tasks: Tache[] } & Pick<Props, 'onRefresh' | 'onEdit'>) {
-  if (tasks.length === 0) return null
-  return (
-    <>
-      <div className="grp-done-hd">
-        <span className="grp-done-label">Terminées ({tasks.length})</span>
-        <span className="grp-done-line" />
-      </div>
-      {tasks.map(t => (
-        <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
-      ))}
-    </>
-  )
-}
-
 function StatusPills({ tasks }: { tasks: Tache[] }) {
   const ov = tasks.filter(t => getDisplayStatus(t.status, t.due_date) === 'overdue').length
   const td = tasks.filter(t => getDisplayStatus(t.status, t.due_date) === 'today').length
@@ -66,58 +51,49 @@ function splitByBien(tasks: Tache[]): { biens: [string, Entry][]; general: Tache
 }
 
 function BienGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
-  const active = tasks.filter(t => t.status !== 'done')
-  const done   = tasks.filter(t => t.status === 'done')
   return (
     <div className="grp-bien">
       <div className="grp-bien-hd">
         <span className="grp-bien-name">{name}</span>
         <StatusPills tasks={tasks} />
       </div>
-      {sortTasks(active).map(t => (
+      {sortTasks(tasks).map(t => (
         <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
       ))}
-      <DoneSection tasks={done} onRefresh={onRefresh} onEdit={onEdit} />
     </div>
   )
 }
 
 function SocGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
   const { biens, general } = splitByBien(tasks)
-  const hasBiens = biens.length > 0
-  if (hasBiens) {
-    return (
-      <div className="grp-soc">
-        <div className="grp-soc-hd">
-          <span className="grp-soc-name">{name}</span>
-          <StatusPills tasks={tasks} />
-        </div>
-        {biens.map(([id, bien]) => (
-          <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
-        ))}
-        {general.length > 0 && (
-          <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
-        )}
-      </div>
-    )
-  }
-  const active = tasks.filter(t => t.status !== 'done')
-  const done   = tasks.filter(t => t.status === 'done')
   return (
     <div className="grp-soc">
       <div className="grp-soc-hd">
         <span className="grp-soc-name">{name}</span>
         <StatusPills tasks={tasks} />
       </div>
-      {sortTasks(active).map(t => (
-        <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
-      ))}
-      <DoneSection tasks={done} onRefresh={onRefresh} onEdit={onEdit} />
+      {biens.length > 0 ? (
+        <>
+          {biens.map(([id, bien]) => (
+            <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
+          ))}
+          {general.length > 0 && (
+            <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
+          )}
+        </>
+      ) : (
+        sortTasks(tasks).map(t => (
+          <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
+        ))
+      )}
     </div>
   )
 }
 
 export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: Props) {
+  const active = taches.filter(t => t.status !== 'done')
+  const done   = taches.filter(t => t.status === 'done')
+
   if (taches.length === 0) {
     return (
       <div className="tscroll">
@@ -126,70 +102,82 @@ export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: 
     )
   }
 
-  // Vue société : biens au niveau supérieur (pas de header société redondant)
+  let groups: React.ReactNode
+
+  // Vue société : biens au niveau supérieur
   if (activeSoc !== 'all') {
-    const { biens, general } = splitByBien(taches)
-    return (
-      <div className="tscroll">
+    const { biens, general } = splitByBien(active)
+    groups = (
+      <>
         {biens.map(([id, bien]) => (
           <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
         ))}
         {general.length > 0 && (
           <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
         )}
-      </div>
+      </>
     )
   }
 
   // Vue personnelle : société → biens
-  if (activeOwner !== 'all') {
+  else if (activeOwner !== 'all') {
     const socMap = new Map<string, Entry>()
-    for (const t of taches) {
+    for (const t of active) {
       const id = t.societe_id
       if (!socMap.has(id)) socMap.set(id, { name: t.societe?.name ?? '—', tasks: [] })
       socMap.get(id)!.tasks.push(t)
     }
-    return (
-      <div className="tscroll">
-        {[...socMap.entries()].map(([id, soc]) => (
-          <SocGroup key={id} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
-        ))}
-      </div>
-    )
+    groups = [...socMap.entries()].map(([id, soc]) => (
+      <SocGroup key={id} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
+    ))
   }
 
   // Vue tout : propriétaire → société → biens
-  const owners = new Map<string, { name: string; color: string; socs: Map<string, Entry> }>()
-  for (const t of taches) {
-    const ownerId = t.societe?.owner?.id ?? '__'
-    if (!owners.has(ownerId)) {
-      owners.set(ownerId, {
-        name:  t.societe?.owner?.name     ?? '—',
-        color: t.societe?.owner?.color_css ?? '#9CA3AF',
-        socs:  new Map(),
-      })
+  else {
+    const owners = new Map<string, { name: string; color: string; socs: Map<string, Entry> }>()
+    for (const t of active) {
+      const ownerId = t.societe?.owner?.id ?? '__'
+      if (!owners.has(ownerId)) {
+        owners.set(ownerId, {
+          name:  t.societe?.owner?.name      ?? '—',
+          color: t.societe?.owner?.color_css ?? '#9CA3AF',
+          socs:  new Map(),
+        })
+      }
+      const owner = owners.get(ownerId)!
+      const socId = t.societe_id
+      if (!owner.socs.has(socId)) {
+        owner.socs.set(socId, { name: t.societe?.name ?? '—', tasks: [] })
+      }
+      owner.socs.get(socId)!.tasks.push(t)
     }
-    const owner = owners.get(ownerId)!
-    const socId = t.societe_id
-    if (!owner.socs.has(socId)) {
-      owner.socs.set(socId, { name: t.societe?.name ?? '—', tasks: [] })
-    }
-    owner.socs.get(socId)!.tasks.push(t)
+    groups = [...owners.entries()].map(([ownerId, owner]) => (
+      <div key={ownerId} className="grp-owner">
+        <div className="grp-owner-hd">
+          <span className="grp-owner-dot" style={{ background: owner.color }} />
+          <span className="grp-owner-name">{owner.name}</span>
+        </div>
+        {[...owner.socs.entries()].map(([socId, soc]) => (
+          <SocGroup key={socId} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
+        ))}
+      </div>
+    ))
   }
 
   return (
     <div className="tscroll">
-      {[...owners.entries()].map(([ownerId, owner]) => (
-        <div key={ownerId} className="grp-owner">
-          <div className="grp-owner-hd">
-            <span className="grp-owner-dot" style={{ background: owner.color }} />
-            <span className="grp-owner-name">{owner.name}</span>
+      {groups}
+      {done.length > 0 && (
+        <div className="grp-done-section">
+          <div className="grp-done-hd">
+            <span className="grp-done-label">Terminées ({done.length})</span>
+            <span className="grp-done-line" />
           </div>
-          {[...owner.socs.entries()].map(([socId, soc]) => (
-            <SocGroup key={socId} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
+          {done.map(t => (
+            <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
           ))}
         </div>
-      ))}
+      )}
     </div>
   )
 }
