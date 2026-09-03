@@ -211,7 +211,6 @@ button { font-family: inherit; }
 .grp-owner-hd {
   display: flex; align-items: center; gap: 10px;
   padding-bottom: 10px; margin-bottom: 12px;
-  border-bottom: 2px solid var(--border);
 }
 .grp-owner-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .grp-owner-name {
