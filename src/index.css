@@ -215,9 +215,7 @@ button { font-family: inherit; }
 .due.ov { color: var(--danger); font-weight: 700; }
 .due.td { color: var(--warn);   font-weight: 700; }
 
-.tc-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-.tc.expanded .tc-detail { display: block; }
-.tc-note { font-size: 14px; color: var(--tx2); line-height: 1.6; margin-bottom: 12px; }
+.tc-note { font-size: 14px; color: var(--tx2); line-height: 1.6; margin-top: 6px; margin-bottom: 8px; }
 .tc-acts { display: flex; gap: 7px; }
 .ta-btn { border: 1px solid var(--border-s); background: var(--sunken); border-radius: 7px; padding: 5px 12px; font-size: 13px; font-weight: 600; color: var(--tx2); cursor: pointer; transition: all .1s; }
 .ta-btn:hover:not(:disabled) { background: var(--surface); border-color: var(--tx3); color: var(--tx1); }

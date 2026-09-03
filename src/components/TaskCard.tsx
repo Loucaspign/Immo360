@@ -16,8 +16,7 @@ interface Props {
 }
 
 export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
-  const [expanded, setExpanded] = useState(false)
-  const [marking, setMarking]   = useState(false)
+  const [marking, setMarking] = useState(false)
 
   const ds      = getDisplayStatus(t.status, t.due_date)
   const isDone  = t.status === 'done'
@@ -32,10 +31,8 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
     setMarking(false)
   }
 
-  function toggleExpand() { setExpanded(x => !x) }
-
   return (
-    <div className={`tc${expanded ? ' expanded' : ''}`} onClick={toggleExpand}>
+    <div className="tc">
       <div className={`tchk${isDone ? ' done' : ''}`} onClick={toggleDone}>
         <svg className="chk-svg" viewBox="0 0 10 8" aria-hidden="true">
           <polyline points="1,4 3.5,7 9,1" />
@@ -71,17 +68,13 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
           </span>
         </div>
 
-        {expanded && (
-          <div className="tc-detail">
-            {t.notes && <div className="tc-note">{t.notes}</div>}
-            <div className="tc-acts">
-              <button className="ta-btn p" onClick={toggleDone} disabled={marking}>
-                {marking ? '…' : isDone ? '↩ Rouvrir' : '✓ Marquer fait'}
-              </button>
-              <button className="ta-btn" onClick={e => { e.stopPropagation(); onEdit(t) }}>✎ Modifier</button>
-            </div>
-          </div>
-        )}
+        {t.notes && <div className="tc-note">{t.notes}</div>}
+        <div className="tc-acts">
+          <button className="ta-btn p" onClick={toggleDone} disabled={marking}>
+            {marking ? '…' : isDone ? '↩ Rouvrir' : '✓ Marquer fait'}
+          </button>
+          <button className="ta-btn" onClick={e => { e.stopPropagation(); onEdit(t) }}>✎ Modifier</button>
+        </div>
       </div>
     </div>
   )
