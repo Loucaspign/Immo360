@@ -124,6 +124,7 @@ export default function App() {
         </div>
         <TaskList
           taches={filteredTaches}
+          activeOwner={activeOwner}
           onRefresh={loadData}
           onEdit={t => { setEditTache(t); setShowNewTask(true) }}
         />

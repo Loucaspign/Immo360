@@ -223,6 +223,45 @@ button { font-family: inherit; }
 .ta-btn.p:hover:not(:disabled) { opacity: .82; }
 .ta-btn:disabled { opacity: .5; cursor: default; }
 
+/* ── CARD STATUS (direct, sans groupe parent) ───────────────── */
+.tc.tc-overdue::before  { background: var(--danger); }
+.tc.tc-today::before    { background: var(--warn); }
+.tc.tc-week::before     { background: var(--info); }
+.tc.tc-upcoming::before { background: transparent; }
+.tc.tc-done::before     { background: var(--border); }
+.tc.tc-done .tc-title   { text-decoration: line-through; color: var(--tx3); }
+.tc.tc-done             { opacity: .72; }
+
+/* ── GROUPES PAR PROPRIÉTAIRE ───────────────────────────────── */
+.grp-owner { margin-bottom: 30px; }
+.grp-owner-hd {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 9px; margin-bottom: 10px;
+  border-bottom: 1.5px solid var(--border);
+}
+.grp-owner-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.grp-owner-name {
+  font-size: 11px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--tx2);
+}
+
+/* ── GROUPES PAR SOCIÉTÉ ────────────────────────────────────── */
+.grp-soc { margin-bottom: 18px; }
+.grp-soc-hd {
+  display: flex; align-items: baseline; gap: 9px;
+  padding: 4px 0 7px;
+}
+.grp-soc-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 16px; font-weight: 600; color: var(--tx1);
+}
+.soc-pills { display: flex; gap: 5px; }
+.soc-pill {
+  font-size: 11px; font-weight: 600; border-radius: 10px; padding: 2px 8px; line-height: 1.4;
+}
+.soc-pill.ov { color: var(--danger); background: rgba(220,38,38,.09); }
+.soc-pill.td { color: var(--warn);   background: rgba(217,119,6,.09); }
+
 /* ── MODAL ──────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 100;

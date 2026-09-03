@@ -19,7 +19,7 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
   const [localDone, setLocalDone] = useState(t.status === 'done')
   useEffect(() => { setLocalDone(t.status === 'done') }, [t.status])
 
-  const ds      = getDisplayStatus(t.status, t.due_date)
+  const ds      = getDisplayStatus(localDone ? 'done' : 'todo', t.due_date)
   const profile = t.societe?.owner
 
   async function toggleDone(e: React.MouseEvent) {
@@ -31,7 +31,7 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
   }
 
   return (
-    <div className="tc">
+    <div className={`tc tc-${ds}`}>
       <div className={`tchk${localDone ? ' done' : ''}`} onClick={toggleDone}>
         <svg className="chk-svg" viewBox="0 0 10 8" aria-hidden="true">
           <polyline points="1,4 3.5,7 9,1" />
