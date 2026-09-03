@@ -24,13 +24,13 @@
 
   /* Sidebar — sombre */
   --sb-bg:     #111827;
-  --sb-tx1:    #F9FAFB;
-  --sb-tx2:    #9CA3AF;
-  --sb-muted:  rgba(255,255,255,0.28);
-  --sb-border: rgba(255,255,255,0.08);
-  --sb-hover:  rgba(255,255,255,0.06);
-  --sb-sel:    rgba(79,70,229,0.28);
-  --sb-badge:  rgba(255,255,255,0.10);
+  --sb-tx1:    #FFFFFF;
+  --sb-tx2:    #D1D5DB;
+  --sb-muted:  rgba(255,255,255,0.45);
+  --sb-border: rgba(255,255,255,0.10);
+  --sb-hover:  rgba(255,255,255,0.07);
+  --sb-sel:    rgba(79,70,229,0.30);
+  --sb-badge:  rgba(255,255,255,0.12);
 }
 
 /* ── BASE ───────────────────────────────────────────────────── */
@@ -90,8 +90,8 @@ button { font-family: inherit; }
 .soc-row:hover { background: var(--sb-hover); }
 .soc-row.sel   { background: var(--sb-sel); }
 .soc-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.soc-name { flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 14px; color: var(--sb-tx2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; transition: color .12s; }
-.soc-row:hover .soc-name, .soc-row.sel .soc-name { color: var(--sb-tx1); }
+.soc-name { flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 15px; color: var(--sb-tx1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; transition: color .12s; }
+.soc-row:hover .soc-name, .soc-row.sel .soc-name { color: #FFFFFF; }
 .soc-badge { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--sb-tx2); background: var(--sb-badge); border-radius: 8px; padding: 1px 7px; flex-shrink: 0; }
 .soc-chevron { font-size: 9px; color: var(--sb-muted); flex-shrink: 0; transition: color .1s; }
 .soc-row:hover .soc-chevron, .soc-row.sel .soc-chevron { color: var(--sb-tx2); }
@@ -100,7 +100,7 @@ button { font-family: inherit; }
 .bien-row  { display: flex; align-items: center; gap: 7px; padding: 4px 14px 4px 12px; cursor: pointer; transition: background .1s; user-select: none; }
 .bien-row:hover { background: var(--sb-hover); }
 .bien-row.sel   { background: var(--sb-sel); }
-.bien-name { flex: 1; font-size: 13px; color: var(--sb-tx2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bien-name { flex: 1; font-size: 14px; color: var(--sb-tx2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bien-row:hover .bien-name, .bien-row.sel .bien-name { color: var(--sb-tx1); }
 .bien-lots  { font-size: 11px; color: var(--sb-muted); white-space: nowrap; flex-shrink: 0; }
 .bien-badge { font-size: 11px; font-weight: 600; color: var(--sb-tx2); background: var(--sb-badge); border-radius: 5px; padding: 1px 6px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
