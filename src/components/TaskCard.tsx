@@ -32,9 +32,7 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
     setMarking(false)
   }
 
-  function toggleExpand() {
-    if (t.notes) setExpanded(x => !x)
-  }
+  function toggleExpand() { setExpanded(x => !x) }
 
   return (
     <div className={`tc${expanded ? ' expanded' : ''}`} onClick={toggleExpand}>
@@ -73,14 +71,13 @@ export function TaskCard({ tache: t, onRefresh, onEdit }: Props) {
           </span>
         </div>
 
-        {expanded && t.notes && (
+        {expanded && (
           <div className="tc-detail">
-            <div className="tc-note">{t.notes}</div>
+            {t.notes && <div className="tc-note">{t.notes}</div>}
             <div className="tc-acts">
               <button className="ta-btn p" onClick={toggleDone} disabled={marking}>
                 {marking ? '…' : isDone ? '↩ Rouvrir' : '✓ Marquer fait'}
               </button>
-              <button className="ta-btn" onClick={e => e.stopPropagation()}>⏱ Reporter</button>
               <button className="ta-btn" onClick={e => { e.stopPropagation(); onEdit(t) }}>✎ Modifier</button>
             </div>
           </div>
