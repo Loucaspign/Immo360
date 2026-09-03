@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import type { Profile, Societe, Bien, Tache } from './types'
@@ -22,6 +22,7 @@ export default function App() {
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
   const [activeBien, setActiveBien]     = useState('all')
+  const didInitOwner = useRef(false)
   const [showNewTask,   setShowNewTask]   = useState(false)
   const [editTache,     setEditTache]     = useState<import('./types').Tache | undefined>()
   const [showSocModal,  setShowSocModal]  = useState(false)
@@ -58,6 +59,14 @@ export default function App() {
     if (b.data) setBiens(b.data as Bien[])
     if (t.data) setTaches(t.data as unknown as Tache[])
   }, [])
+
+  // Auto-select logged-in user's filter on first load
+  useEffect(() => {
+    if (session && profiles.length > 0 && !didInitOwner.current) {
+      didInitOwner.current = true
+      setActiveOwner(session.user.id)
+    }
+  }, [session, profiles])
 
   useEffect(() => {
     if (!session) return

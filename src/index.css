@@ -70,11 +70,11 @@ button { font-family: inherit; }
 .logo-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 20px; color: var(--sb-tx1); letter-spacing: -0.04em; line-height: 1; }
 .logo-sup  { font-size: 12px; font-weight: 700; color: var(--uL); letter-spacing: 0.02em; padding-left: 3px; vertical-align: super; line-height: 1; }
 
-.ufilter { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 18px; }
-.uf-btn { border: 1.5px solid var(--sb-border); background: transparent; border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 500; color: var(--sb-tx2); cursor: pointer; transition: border-color .12s, color .12s, background .12s; user-select: none; white-space: nowrap; }
-.uf-btn:hover   { color: var(--sb-tx1); background: var(--sb-hover); border-color: var(--sb-border); }
-.uf-btn.active-all { color: var(--sb-tx1); border-color: var(--sb-tx1); }
-.uf-btn.active-u   { color: var(--u-color); border-color: var(--u-color); }
+.ufilter { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 18px; }
+.uf-btn { border: 1.5px solid rgba(255,255,255,0.20); background: rgba(255,255,255,0.06); border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 600; color: var(--sb-tx1); cursor: pointer; transition: border-color .12s, color .12s, background .12s; user-select: none; white-space: nowrap; }
+.uf-btn:hover   { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.35); }
+.uf-btn.active-all { color: #FFFFFF; border-color: #FFFFFF; background: rgba(255,255,255,0.12); }
+.uf-btn.active-u   { color: var(--u-color); border-color: var(--u-color); background: color-mix(in srgb, var(--u-color) 14%, transparent); }
 
 .sb-list { flex: 1; overflow-y: auto; padding: 10px 0 4px; scrollbar-width: none; }
 .sb-list::-webkit-scrollbar { display: none; }
