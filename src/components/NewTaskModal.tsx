@@ -54,7 +54,7 @@ export function NewTaskModal({
     } else {
       setSocId(defaultSoc)
       setBienId(defaultBien)
-      setAssignedTo('')
+      setAssignedTo(userId)
       setTitle(''); setCategory('admin'); setDueDate(''); setAmount(''); setNotes('')
     }
     setError(null)
