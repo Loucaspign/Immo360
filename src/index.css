@@ -279,6 +279,9 @@ button { font-family: inherit; }
   font-size: 11px; font-weight: 600; color: var(--tx3);
   text-transform: uppercase; letter-spacing: 0.06em;
 }
+.grp-bien-name--general {
+  font-size: 12px; font-weight: 700; color: var(--tx2); letter-spacing: 0.02em;
+}
 .grp-done-section { margin-top: 24px; }
 .grp-done-hd {
   display: flex; align-items: center; gap: 8px;

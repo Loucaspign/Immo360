@@ -50,11 +50,11 @@ function splitByBien(tasks: Tache[]): { biens: [string, Entry][]; general: Tache
   return { biens: [...map.entries()], general }
 }
 
-function BienGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
+function BienGroup({ name, tasks, onRefresh, onEdit, general = false }: Entry & Pick<Props, 'onRefresh' | 'onEdit'> & { general?: boolean }) {
   return (
     <div className="grp-bien">
       <div className="grp-bien-hd">
-        <span className="grp-bien-name">{name}</span>
+        <span className={general ? 'grp-bien-name grp-bien-name--general' : 'grp-bien-name'}>{name}</span>
         <StatusPills tasks={tasks} />
       </div>
       {sortTasks(tasks).map(t => (
@@ -74,12 +74,12 @@ function SocGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRef
       </div>
       {biens.length > 0 ? (
         <>
+          {general.length > 0 && (
+            <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} general />
+          )}
           {biens.map(([id, bien]) => (
             <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
           ))}
-          {general.length > 0 && (
-            <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
-          )}
         </>
       ) : (
         sortTasks(tasks).map(t => (
@@ -109,12 +109,12 @@ export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: 
     const { biens, general } = splitByBien(active)
     groups = (
       <>
+        {general.length > 0 && (
+          <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} general />
+        )}
         {biens.map(([id, bien]) => (
           <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
         ))}
-        {general.length > 0 && (
-          <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} />
-        )}
       </>
     )
   }
