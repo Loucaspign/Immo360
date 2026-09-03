@@ -177,7 +177,7 @@ export default function App() {
               </div>
             </div>
           </div>
-          <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} refreshKey={comptaRefreshKey} />
+          <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} activeSoc={activeSoc} refreshKey={comptaRefreshKey} />
         </>}
       </main>
 

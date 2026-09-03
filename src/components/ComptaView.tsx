@@ -58,10 +58,11 @@ interface Props {
   societes:    Societe[]
   profiles:    Profile[]
   activeOwner: string
+  activeSoc:   string
   refreshKey:  number
 }
 
-export function ComptaView({ societes, profiles, activeOwner, refreshKey }: Props) {
+export function ComptaView({ societes, profiles, activeOwner, activeSoc, refreshKey }: Props) {
   const [templates,   setTemplates]   = useState<ComptaTemplate[]>([])
   const [entries,     setEntries]     = useState<ComptaEntry[]>([])
   const [year,        setYear]        = useState(new Date().getFullYear())
@@ -110,14 +111,16 @@ export function ComptaView({ societes, profiles, activeOwner, refreshKey }: Prop
 
   const doneSet = new Set(entries.map(e => `${e.template_id}::${e.period_key}`))
 
-  // Filter societes by active owner
-  const visibleSocs = activeOwner === 'all'
-    ? societes
-    : societes.filter(s => s.owner_id === activeOwner)
+  // Filter societes by active owner and active société
+  const visibleSocs = societes.filter(s => {
+    if (activeSoc !== 'all' && s.id !== activeSoc) return false
+    if (activeOwner !== 'all' && s.owner_id !== activeOwner) return false
+    return true
+  })
 
-  // Group by owner when "tout voir"
+  // Group by owner when "tout voir" (and no specific société selected)
   const groups: { profile: Profile | null; socs: Societe[] }[] =
-    activeOwner !== 'all'
+    activeOwner !== 'all' || activeSoc !== 'all'
       ? [{ profile: null, socs: visibleSocs }]
       : profiles.map(p => ({ profile: p, socs: visibleSocs.filter(s => s.owner_id === p.id) }))
                .filter(g => g.socs.length > 0)
