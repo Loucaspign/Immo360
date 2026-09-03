@@ -128,7 +128,7 @@ export default function App() {
         activeSoc={activeSoc}
         activeBien={activeBien}
         onOwnerChange={id => { setActiveOwner(id); setActiveSoc('all'); setActiveBien('all') }}
-        onSocChange={id  => { setActiveSoc(id);   setActiveBien('all'); if (id !== 'all') setActiveOwner('all') }}
+        onSocChange={id  => { setActiveSoc(id); setActiveBien('all'); if (id !== 'all') { const soc = societes.find(s => s.id === id); if (soc) setActiveOwner(soc.owner_id) } }}
         onBienChange={setActiveBien}
         onSignOut={() => supabase.auth.signOut()}
         onRefresh={loadData}
