@@ -1,18 +1,19 @@
-/* ── TOKENS ─────────────────────────────────────────────────── */
+/* ── TOKENS — thème unique fixe ─────────────────────────────── */
 :root {
-  --bg:      #F4F6F8;   /* gris très clair */
+  /* Zone principale — claire */
+  --bg:      #F4F6F8;
   --surface: #FFFFFF;
   --sunken:  #F0F2F5;
   --border:  #E5E7EB;
   --border-s:#CBD0D8;
 
-  --tx1: #111827;       /* quasi-noir */
-  --tx2: #6B7280;       /* gris medium */
-  --tx3: #9CA3AF;       /* gris muted */
+  --tx1: #111827;
+  --tx2: #6B7280;
+  --tx3: #9CA3AF;
 
-  --uL: #4F46E5;        /* indigo (Loucas) */
-  --uP: #D97706;        /* ambre (Père) */
-  --uF: #059669;        /* émeraude (Frère) */
+  --uL: #4F46E5;
+  --uP: #D97706;
+  --uF: #059669;
 
   --danger:    #DC2626; --danger-bg: #FEF2F2;
   --warn:      #D97706; --warn-bg:   #FFFBEB;
@@ -21,45 +22,15 @@
   --sh-s: 0 1px 2px rgba(0,0,0,0.05), 0 1px 6px rgba(0,0,0,0.04);
   --sh-m: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
 
-  --sb-bg:     #FFFFFF;
-  --sb-tx1:    #111827;
-  --sb-tx2:    #6B7280;
-  --sb-muted:  rgba(17,24,39,0.30);
-  --sb-border: rgba(17,24,39,0.07);
-  --sb-hover:  rgba(79,70,229,0.05);
-  --sb-sel:    rgba(79,70,229,0.09);
-  --sb-badge:  rgba(17,24,39,0.07);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg:      #0F1117; --surface: #1A1D27; --sunken: #13151C;
-    --border:  rgba(255,255,255,0.08); --border-s: rgba(255,255,255,0.13);
-    --tx1: #F3F4F6; --tx2: #9CA3AF; --tx3: #6B7280;
-    --uL: #818CF8; --uP: #FBBF24; --uF: #34D399;
-    --danger: #F87171; --danger-bg: #1F0808;
-    --warn:   #FBBF24; --warn-bg:   #1C1000;
-    --info:   #818CF8; --info-bg:   #0E0E28;
-    --sh-s: 0 1px 3px rgba(0,0,0,0.4); --sh-m: 0 4px 20px rgba(0,0,0,0.6);
-    --sb-bg: #13151C; --sb-tx1: #F3F4F6; --sb-tx2: #9CA3AF;
-    --sb-muted: rgba(255,255,255,0.22); --sb-border: rgba(255,255,255,0.07);
-    --sb-hover: rgba(129,140,248,0.08); --sb-sel: rgba(129,140,248,0.14);
-    --sb-badge: rgba(255,255,255,0.09);
-  }
-}
-:root[data-theme="dark"] {
-  --bg:      #0F1117; --surface: #1A1D27; --sunken: #13151C;
-  --border:  rgba(255,255,255,0.08); --border-s: rgba(255,255,255,0.13);
-  --tx1: #F3F4F6; --tx2: #9CA3AF; --tx3: #6B7280;
-  --uL: #818CF8; --uP: #FBBF24; --uF: #34D399;
-  --danger: #F87171; --danger-bg: #1F0808;
-  --warn:   #FBBF24; --warn-bg:   #1C1000;
-  --info:   #818CF8; --info-bg:   #0E0E28;
-  --sh-s: 0 1px 3px rgba(0,0,0,0.4); --sh-m: 0 4px 20px rgba(0,0,0,0.6);
-  --sb-bg: #13151C; --sb-tx1: #F3F4F6; --sb-tx2: #9CA3AF;
-  --sb-muted: rgba(255,255,255,0.22); --sb-border: rgba(255,255,255,0.07);
-  --sb-hover: rgba(129,140,248,0.08); --sb-sel: rgba(129,140,248,0.14);
-  --sb-badge: rgba(255,255,255,0.09);
+  /* Sidebar — sombre */
+  --sb-bg:     #111827;
+  --sb-tx1:    #F9FAFB;
+  --sb-tx2:    #9CA3AF;
+  --sb-muted:  rgba(255,255,255,0.28);
+  --sb-border: rgba(255,255,255,0.08);
+  --sb-hover:  rgba(255,255,255,0.06);
+  --sb-sel:    rgba(79,70,229,0.28);
+  --sb-badge:  rgba(255,255,255,0.10);
 }
 
 /* ── BASE ───────────────────────────────────────────────────── */
@@ -209,16 +180,6 @@ button { font-family: inherit; }
 .cat.fiscal { background: #F5F0FF; color: #6D28D9; }
 .cat.tech   { background: #ECFDF5; color: #065F46; }
 .cat.admin  { background: #F3F4F6; color: #374151; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .cat.loyer  { background: #1E2D50; color: #93C5FD; }
-  :root:not([data-theme="light"]) .cat.fiscal { background: #2D1A50; color: #C4B5FD; }
-  :root:not([data-theme="light"]) .cat.tech   { background: #064830; color: #6EE7B7; }
-  :root:not([data-theme="light"]) .cat.admin  { background: #1F2937; color: #9CA3AF; }
-}
-:root[data-theme="dark"] .cat.loyer  { background: #1E2D50; color: #93C5FD; }
-:root[data-theme="dark"] .cat.fiscal { background: #2D1A50; color: #C4B5FD; }
-:root[data-theme="dark"] .cat.tech   { background: #064830; color: #6EE7B7; }
-:root[data-theme="dark"] .cat.admin  { background: #1F2937; color: #9CA3AF; }
 
 .amt   { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--tx2); background: var(--sunken); border-radius: 5px; padding: 2px 7px; }
 .recur { font-size: 12px; color: var(--tx3); }
