@@ -108,7 +108,13 @@ button { font-family: inherit; }
 
 .sb-list { flex: 1; overflow-y: auto; padding: 10px 0 4px; scrollbar-width: none; }
 .sb-list::-webkit-scrollbar { display: none; }
-.sb-group-lbl { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--sb-muted); padding: 10px 18px 4px; }
+.sb-group-lbl { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--sb-muted); padding: 10px 18px 4px; display: flex; align-items: center; justify-content: space-between; }
+.sb-add-btn { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; border: none; background: transparent; color: var(--sb-muted); cursor: pointer; transition: all .1s; padding: 0; flex-shrink: 0; }
+.sb-add-btn:hover { background: var(--sb-hover); color: var(--sb-tx1); }
+.sb-del-btn { display: none; place-items: center; width: 20px; height: 20px; border-radius: 5px; border: none; background: transparent; color: var(--sb-muted); cursor: pointer; transition: all .1s; padding: 0; flex-shrink: 0; }
+.sb-del-btn:hover { background: rgba(220,38,38,.1); color: var(--danger); }
+.soc-row:hover .sb-del-btn, .bien-row:hover .sb-del-btn { display: grid; }
+.soc-row.deleting, .bien-row.deleting { opacity: .4; pointer-events: none; }
 .sb-divider { height: 1px; background: var(--sb-border); margin: 6px 18px; }
 .soc-row { display: flex; align-items: center; gap: 9px; padding: 6px 18px; cursor: pointer; transition: background .1s; user-select: none; border-radius: 0; }
 .soc-row:hover { background: var(--sb-hover); }
@@ -128,6 +134,8 @@ button { font-family: inherit; }
 .bien-row:hover .bien-name, .bien-row.sel .bien-name { color: var(--sb-tx1); }
 .bien-lots  { font-size: 11px; color: var(--sb-muted); white-space: nowrap; flex-shrink: 0; }
 .bien-badge { font-size: 11px; font-weight: 600; color: var(--sb-tx2); background: var(--sb-badge); border-radius: 5px; padding: 1px 6px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.bien-add-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 4px 14px 4px 12px; background: transparent; border: none; color: var(--sb-muted); font-size: 12px; font-weight: 500; cursor: pointer; transition: color .1s; text-align: left; }
+.bien-add-btn:hover { color: var(--sb-tx1); }
 
 .sb-summary { flex-shrink: 0; padding: 12px 18px 16px; border-top: 1px solid var(--sb-border); display: flex; flex-direction: column; gap: 5px; }
 .sb-stat { display: flex; align-items: center; gap: 8px; }

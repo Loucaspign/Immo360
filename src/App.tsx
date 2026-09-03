@@ -6,6 +6,8 @@ import { LoginScreen } from './components/LoginScreen'
 import { Sidebar } from './components/Sidebar'
 import { TaskList } from './components/TaskList'
 import { NewTaskModal } from './components/NewTaskModal'
+import { SocieteModal } from './components/SocieteModal'
+import { BienModal } from './components/BienModal'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -19,8 +21,12 @@ export default function App() {
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
   const [activeBien, setActiveBien]     = useState('all')
-  const [showNewTask, setShowNewTask]   = useState(false)
-  const [editTache,   setEditTache]     = useState<import('./types').Tache | undefined>()
+  const [showNewTask,   setShowNewTask]   = useState(false)
+  const [editTache,     setEditTache]     = useState<import('./types').Tache | undefined>()
+  const [showSocModal,  setShowSocModal]  = useState(false)
+  const [socOwnerDef,   setSocOwnerDef]   = useState('')
+  const [showBienModal, setShowBienModal] = useState(false)
+  const [bienSocDef,    setBienSocDef]    = useState('')
 
   // Auth
   useEffect(() => {
@@ -107,6 +113,9 @@ export default function App() {
         onSocChange={id  => { setActiveSoc(id);   setActiveBien('all'); if (id !== 'all') setActiveOwner('all') }}
         onBienChange={setActiveBien}
         onSignOut={() => supabase.auth.signOut()}
+        onRefresh={loadData}
+        onAddSociete={ownerId => { setSocOwnerDef(ownerId); setShowSocModal(true) }}
+        onAddBien={socId => { setBienSocDef(socId); setShowBienModal(true) }}
       />
       <main className="main">
         <div className="mhdr">
@@ -143,6 +152,22 @@ export default function App() {
         defaultSoc={activeSoc  !== 'all' ? activeSoc  : ''}
         defaultBien={activeBien !== 'all' ? activeBien : ''}
         editTache={editTache}
+      />
+
+      <SocieteModal
+        open={showSocModal}
+        onClose={() => setShowSocModal(false)}
+        onSaved={loadData}
+        profiles={profiles}
+        defaultOwner={socOwnerDef}
+      />
+
+      <BienModal
+        open={showBienModal}
+        onClose={() => setShowBienModal(false)}
+        onSaved={loadData}
+        societes={societes}
+        defaultSoc={bienSocDef}
       />
     </div>
   )

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { Profile, Societe, Bien, Tache } from '../types'
 import { getDisplayStatus } from '../lib/utils'
+import { supabase } from '../lib/supabase'
 
 interface Props {
   profiles:      Profile[]
@@ -13,18 +15,60 @@ interface Props {
   onSocChange:   (id: string) => void
   onBienChange:  (id: string) => void
   onSignOut:     () => void
+  onRefresh:     () => void
+  onAddSociete:  (ownerId: string) => void
+  onAddBien:     (societeId: string) => void
+}
+
+function IconPlus() {
+  return (
+    <svg viewBox="0 0 10 10" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
+      <path d="M5 1v8M1 5h8" />
+    </svg>
+  )
+}
+
+function IconTrash() {
+  return (
+    <svg viewBox="0 0 14 16" width="11" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M1 4h12M4.5 4V2.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5V4M2.5 4l.7 9a1 1 0 0 0 1 .9h5.6a1 1 0 0 0 1-.9l.7-9" />
+    </svg>
+  )
 }
 
 export function Sidebar({
   profiles, societes, biens, taches,
   activeOwner, activeSoc, activeBien,
   onOwnerChange, onSocChange, onBienChange, onSignOut,
+  onRefresh, onAddSociete, onAddBien,
 }: Props) {
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
   const activeTaches = taches.filter(t => t.status !== 'done')
   const counts = {
     overdue: activeTaches.filter(t => getDisplayStatus(t.status, t.due_date) === 'overdue').length,
     today:   activeTaches.filter(t => getDisplayStatus(t.status, t.due_date) === 'today').length,
     week:    activeTaches.filter(t => getDisplayStatus(t.status, t.due_date) === 'week').length,
+  }
+
+  async function deleteSociete(e: React.MouseEvent, s: Societe) {
+    e.stopPropagation()
+    if (!window.confirm(`Supprimer « ${s.name} » ? Toutes ses tâches et biens seront supprimés.`)) return
+    setDeletingId(s.id)
+    await supabase.from('societes').delete().eq('id', s.id)
+    if (activeSoc === s.id) onSocChange('all')
+    setDeletingId(null)
+    onRefresh()
+  }
+
+  async function deleteBien(e: React.MouseEvent, b: Bien) {
+    e.stopPropagation()
+    if (!window.confirm(`Supprimer le bien « ${b.name} » ?`)) return
+    setDeletingId(b.id)
+    await supabase.from('biens').delete().eq('id', b.id)
+    if (activeBien === b.id) onBienChange('all')
+    setDeletingId(null)
+    onRefresh()
   }
 
   return (
@@ -59,14 +103,20 @@ export function Sidebar({
       <div className="sb-list">
         {profiles.map((profile, gi) => {
           const profileSocs = societes.filter(s => s.owner_id === profile.id)
-          if (!profileSocs.length) return null
           const dim = activeOwner !== 'all' && activeOwner !== profile.id
 
           return (
             <div key={profile.id} style={{ opacity: dim ? 0.3 : 1, transition: 'opacity .12s' }}>
               {gi > 0 && <div className="sb-divider" />}
               <div className="sb-group-lbl">
-                {profile.name} — {profileSocs.length} société{profileSocs.length > 1 ? 's' : ''}
+                <span>{profile.name} — {profileSocs.length} société{profileSocs.length > 1 ? 's' : ''}</span>
+                <button
+                  className="sb-add-btn"
+                  onClick={() => onAddSociete(profile.id)}
+                  title={`Ajouter une société pour ${profile.name}`}
+                >
+                  <IconPlus />
+                </button>
               </div>
               {profileSocs.map(s => {
                 const isOpen = activeSoc === s.id
@@ -76,23 +126,30 @@ export function Sidebar({
                 return (
                   <div key={s.id}>
                     <div
-                      className={`soc-row${isOpen ? ' sel' : ''}`}
+                      className={`soc-row${isOpen ? ' sel' : ''}${deletingId === s.id ? ' deleting' : ''}`}
                       onClick={() => onSocChange(isOpen ? 'all' : s.id)}
                     >
                       <div className="soc-dot" style={{ background: profile.color_css }} />
                       <div className="soc-name">{s.name}</div>
                       {count > 0 && <div className="soc-badge">{count}</div>}
+                      <button
+                        className="sb-del-btn"
+                        onClick={e => deleteSociete(e, s)}
+                        title="Supprimer"
+                      >
+                        <IconTrash />
+                      </button>
                       <div className="soc-chevron">{isOpen ? '▾' : '▸'}</div>
                     </div>
 
-                    {isOpen && socBiens.length > 0 && (
+                    {isOpen && (
                       <div className="bien-list">
                         {socBiens.map(b => {
                           const bCnt = taches.filter(t => t.bien_id === b.id && t.status !== 'done').length
                           return (
                             <div
                               key={b.id}
-                              className={`bien-row${activeBien === b.id ? ' sel' : ''}`}
+                              className={`bien-row${activeBien === b.id ? ' sel' : ''}${deletingId === b.id ? ' deleting' : ''}`}
                               onClick={e => {
                                 e.stopPropagation()
                                 onBienChange(activeBien === b.id ? 'all' : b.id)
@@ -101,9 +158,22 @@ export function Sidebar({
                               <span className="bien-name">{b.name}</span>
                               <span className="bien-lots">{b.lots_count} lot{b.lots_count > 1 ? 's' : ''}</span>
                               {bCnt > 0 && <span className="bien-badge">{bCnt}</span>}
+                              <button
+                                className="sb-del-btn"
+                                onClick={e => deleteBien(e, b)}
+                                title="Supprimer"
+                              >
+                                <IconTrash />
+                              </button>
                             </div>
                           )
                         })}
+                        <button
+                          className="bien-add-btn"
+                          onClick={e => { e.stopPropagation(); onAddBien(s.id) }}
+                        >
+                          <IconPlus /> Ajouter un bien
+                        </button>
                       </div>
                     )}
                   </div>
