@@ -58,9 +58,10 @@ interface Props {
   societes:    Societe[]
   profiles:    Profile[]
   activeOwner: string
+  refreshKey:  number
 }
 
-export function ComptaView({ societes, profiles, activeOwner }: Props) {
+export function ComptaView({ societes, profiles, activeOwner, refreshKey }: Props) {
   const [templates,   setTemplates]   = useState<ComptaTemplate[]>([])
   const [entries,     setEntries]     = useState<ComptaEntry[]>([])
   const [year,        setYear]        = useState(new Date().getFullYear())
@@ -72,7 +73,7 @@ export function ComptaView({ societes, profiles, activeOwner }: Props) {
   const today = new Date().toISOString().slice(0, 10)
   const soonDate = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10)
 
-  useEffect(() => { loadAll() }, [])
+  useEffect(() => { loadAll() }, [refreshKey])
 
   async function loadAll() {
     const [tr, en] = await Promise.all([

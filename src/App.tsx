@@ -21,6 +21,7 @@ export default function App() {
   const [taches, setTaches] = useState<Tache[]>([])
 
   const [view, setView] = useState<'tasks' | 'compta'>('tasks')
+  const [comptaRefreshKey, setComptaRefreshKey] = useState(0)
 
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
@@ -76,9 +77,11 @@ export default function App() {
     loadData()
 
     const ch = supabase.channel('immo360')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'taches' },   loadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'biens' },    loadData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'societes' }, loadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'taches' },            loadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'biens' },             loadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'societes' },          loadData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'compta_templates' }, () => setComptaRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'compta_entries' },   () => setComptaRefreshKey(k => k + 1))
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
@@ -174,7 +177,7 @@ export default function App() {
               </div>
             </div>
           </div>
-          <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} />
+          <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} refreshKey={comptaRefreshKey} />
         </>}
       </main>
 
