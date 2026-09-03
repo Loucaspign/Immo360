@@ -8,6 +8,7 @@ import { TaskList } from './components/TaskList'
 import { NewTaskModal } from './components/NewTaskModal'
 import { SocieteModal } from './components/SocieteModal'
 import { BienModal } from './components/BienModal'
+import { QuickList } from './components/QuickList'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -136,6 +137,7 @@ export default function App() {
             <button className="btn-new" onClick={() => setShowNewTask(true)}>+ Nouvelle tâche</button>
           </div>
         </div>
+        <QuickList userId={session.user.id} />
         <TaskList
           taches={filteredTaches}
           activeOwner={activeOwner}

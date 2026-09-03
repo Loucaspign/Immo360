@@ -302,6 +302,43 @@ button { font-family: inherit; }
 }
 .grp-done-line { flex: 1; height: 1px; background: var(--border); }
 
+/* ── QUICKLIST ──────────────────────────────────────────────── */
+.ql-strip {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+  padding: 0 24px 16px;
+}
+.ql-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 5px 8px 5px 14px;
+  cursor: pointer; user-select: none; transition: all .15s;
+  font-size: 13px; font-weight: 500; color: var(--tx1);
+}
+.ql-chip:hover { border-color: var(--border-s); box-shadow: var(--sh-s); }
+.ql-chip.done { background: var(--sunken); border-color: var(--border); opacity: .5; }
+.ql-chip.done .ql-text { text-decoration: line-through; color: var(--tx3); }
+.ql-del {
+  background: none; border: none; cursor: pointer; color: var(--tx3);
+  font-size: 15px; line-height: 1; padding: 0 2px;
+  opacity: 0; transition: opacity .1s; flex-shrink: 0;
+}
+.ql-chip:hover .ql-del { opacity: 1; }
+.ql-chip.done .ql-del { opacity: .5; }
+.ql-add {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1.5px dashed var(--border-s); background: transparent;
+  color: var(--tx3); font-size: 17px; line-height: 1;
+  cursor: pointer; display: grid; place-items: center; transition: all .12s;
+}
+.ql-add:hover { border-color: var(--uL); color: var(--uL); background: var(--info-bg); }
+.ql-new { padding: 5px 14px; border-style: dashed; min-width: 160px; }
+.ql-input {
+  background: none; border: none; outline: none;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 500; color: var(--tx1); width: 100%;
+}
+.ql-input::placeholder { color: var(--tx3); }
+
 /* ── MODAL ──────────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 100;

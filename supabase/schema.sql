@@ -88,6 +88,20 @@ create trigger taches_touch_updated_at
   for each row execute procedure public.touch_updated_at();
 
 
+-- ── Quicklist (rappels quotidiens personnels) ─────────────────
+create table public.quicklist (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid references public.profiles(id) on delete cascade not null,
+  text         text not null,
+  position     integer not null default 0,
+  checked_date date,
+  created_at   timestamptz default now()
+);
+alter table public.quicklist enable row level security;
+create policy "quicklist: own rows" on public.quicklist to authenticated
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+
 -- ── Migration : assignation de tâche ─────────────────────────
 -- À exécuter dans l'éditeur SQL Supabase si la table existe déjà
 alter table public.taches
