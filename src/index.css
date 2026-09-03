@@ -67,8 +67,8 @@ button { font-family: inherit; }
 .sb-top { flex-shrink: 0; padding: 20px 18px 16px; border-bottom: 1px solid var(--sb-border); }
 
 .logo { display: flex; align-items: baseline; }
-.logo-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 20px; color: var(--sb-tx1); letter-spacing: -0.04em; line-height: 1; }
-.logo-sup  { font-size: 12px; font-weight: 700; color: var(--uL); letter-spacing: 0.02em; padding-left: 3px; vertical-align: super; line-height: 1; }
+.logo-name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 24px; color: var(--sb-tx1); letter-spacing: -0.04em; line-height: 1; }
+.logo-sup  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 24px; font-weight: 800; color: #6366F1; letter-spacing: -0.04em; line-height: 1; }
 
 .ufilter { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 18px; }
 .uf-btn { border: 1.5px solid rgba(255,255,255,0.20); background: rgba(255,255,255,0.06); border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 600; color: var(--sb-tx1); cursor: pointer; transition: border-color .12s, color .12s, background .12s; user-select: none; white-space: nowrap; }
