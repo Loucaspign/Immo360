@@ -9,6 +9,7 @@ import { NewTaskModal } from './components/NewTaskModal'
 import { SocieteModal } from './components/SocieteModal'
 import { BienModal } from './components/BienModal'
 import { QuickList } from './components/QuickList'
+import { ComptaView } from './components/ComptaView'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -18,6 +19,8 @@ export default function App() {
   const [societes, setSocietes] = useState<Societe[]>([])
   const [biens, setBiens] = useState<Bien[]>([])
   const [taches, setTaches] = useState<Tache[]>([])
+
+  const [view, setView] = useState<'tasks' | 'compta'>('tasks')
 
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
@@ -132,28 +135,47 @@ export default function App() {
         onEditBien={b => { setEditBien(b); setShowBienModal(true) }}
       />
       <main className="main">
-        <div className="mhdr">
-          <div className="hdr-row">
-            <div>
-              <h1 className="page-title">Tableau de bord</h1>
-              <div className="hdr-meta">
-                {today}
-                {overdueCount > 0 && (
-                  <> &nbsp;·&nbsp; <strong>{overdueCount} tâche{overdueCount > 1 ? 's' : ''} en retard</strong></>
-                )}
+        <div className="main-nav">
+          <button className={`main-nav-tab${view === 'tasks'  ? ' active' : ''}`} onClick={() => setView('tasks')}>Tâches</button>
+          <button className={`main-nav-tab${view === 'compta' ? ' active' : ''}`} onClick={() => setView('compta')}>Comptabilité</button>
+        </div>
+
+        {view === 'tasks' && <>
+          <div className="mhdr">
+            <div className="hdr-row">
+              <div>
+                <h1 className="page-title">Tableau de bord</h1>
+                <div className="hdr-meta">
+                  {today}
+                  {overdueCount > 0 && (
+                    <> &nbsp;·&nbsp; <strong>{overdueCount} tâche{overdueCount > 1 ? 's' : ''} en retard</strong></>
+                  )}
+                </div>
+              </div>
+              <button className="btn-new" onClick={() => setShowNewTask(true)}>+ Nouvelle tâche</button>
+            </div>
+          </div>
+          <QuickList userId={session.user.id} />
+          <TaskList
+            taches={filteredTaches}
+            activeOwner={activeOwner}
+            activeSoc={activeSoc}
+            onRefresh={loadData}
+            onEdit={t => { setEditTache(t); setShowNewTask(true) }}
+          />
+        </>}
+
+        {view === 'compta' && <>
+          <div className="mhdr">
+            <div className="hdr-row">
+              <div>
+                <h1 className="page-title">Comptabilité</h1>
+                <div className="hdr-meta">Obligations récurrentes par société</div>
               </div>
             </div>
-            <button className="btn-new" onClick={() => setShowNewTask(true)}>+ Nouvelle tâche</button>
           </div>
-        </div>
-        <QuickList userId={session.user.id} />
-        <TaskList
-          taches={filteredTaches}
-          activeOwner={activeOwner}
-          activeSoc={activeSoc}
-          onRefresh={loadData}
-          onEdit={t => { setEditTache(t); setShowNewTask(true) }}
-        />
+          <ComptaView societes={societes} />
+        </>}
       </main>
 
       <NewTaskModal

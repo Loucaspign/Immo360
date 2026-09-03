@@ -1,4 +1,28 @@
 export type Category     = 'loyer' | 'fiscal' | 'tech' | 'admin'
+
+export type ComptaFrequency = 'mensuel' | 'trimestriel' | 'semestriel' | 'annuel'
+export type ComptaType      = 'tva' | 'versement' | 'loyer' | 'bilan' | 'isoc' | 'autre'
+
+export interface ComptaTemplate {
+  id:         string
+  societe_id: string
+  label:      string
+  type:       ComptaType
+  frequency:  ComptaFrequency
+  due_day:    number
+  due_month:  number | null   // only for annuel
+  notes:      string | null
+  active:     boolean
+  created_at: string
+}
+
+export interface ComptaEntry {
+  id:          string
+  template_id: string
+  period_key:  string         // e.g. "2025-01", "2025-Q2", "2025-S1", "2025"
+  notes:       string | null
+  created_at:  string
+}
 export type TaskStatus   = 'todo' | 'done'
 export type DisplayStatus = 'overdue' | 'today' | 'week' | 'upcoming' | 'done'
 

@@ -108,6 +108,39 @@ alter table public.taches
   add column if not exists assigned_to uuid references public.profiles(id) on delete set null;
 
 
+-- ── Comptabilité — templates d'obligations récurrentes ────────
+create table public.compta_templates (
+  id         uuid primary key default gen_random_uuid(),
+  societe_id uuid references public.societes(id) on delete cascade not null,
+  label      text not null,
+  type       text not null check (type in ('tva','versement','loyer','bilan','isoc','autre')),
+  frequency  text not null check (frequency in ('mensuel','trimestriel','semestriel','annuel')),
+  due_day    integer not null check (due_day between 1 and 31),
+  due_month  integer check (due_month between 1 and 12),  -- pour annuel uniquement
+  notes      text,
+  active     boolean not null default true,
+  created_at timestamptz default now()
+);
+alter table public.compta_templates enable row level security;
+create policy "compta_templates: full access" on public.compta_templates to authenticated using (true) with check (true);
+
+-- ── Comptabilité — entrées cochées (done) ─────────────────────
+create table public.compta_entries (
+  id          uuid primary key default gen_random_uuid(),
+  template_id uuid references public.compta_templates(id) on delete cascade not null,
+  period_key  text not null,   -- "2025-01", "2025-Q2", "2025-S1", "2025"
+  notes       text,
+  created_at  timestamptz default now(),
+  unique(template_id, period_key)
+);
+alter table public.compta_entries enable row level security;
+create policy "compta_entries: full access" on public.compta_entries to authenticated using (true) with check (true);
+
+-- Grants (à exécuter si les tables existent déjà)
+-- grant select, insert, update, delete on public.compta_templates to authenticated;
+-- grant select, insert, update, delete on public.compta_entries to authenticated;
+
+
 -- ══════════════════════════════════════════════════════════════
 --  Données de départ — à adapter avec les vrais UUIDs des comptes
 --  Créer d'abord les 3 comptes via Supabase Dashboard → Authentication
