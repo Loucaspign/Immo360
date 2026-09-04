@@ -93,7 +93,7 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
             </select>
           </div>
 
-          {socId && (
+          {socId && socBatiments.length > 0 && (
             <div className="mf-group">
               <label className="mf-label">Bâtiment <span className="mf-opt">(optionnel)</span></label>
               <select className="mf-select" value={batimentId} onChange={e => setBatimentId(e.target.value)}>
