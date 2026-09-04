@@ -164,6 +164,7 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
                           title={`Échéance : ${p.dueDate}`} disabled={toggling === dk}>
                           {done && <svg viewBox="0 0 10 8" width="10" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4l3 3 5-6"/></svg>}
                           {p.label}
+                          {!done && <span className="ct-chip-date">{p.dueDate.slice(5).replace('-', '/')}</span>}
                         </button>
                       )
                     })}
