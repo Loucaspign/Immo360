@@ -60,10 +60,19 @@ interface Props {
 }
 
 export function AssurancesView({ societes, biens, profiles, activeOwner, activeSoc, refreshKey }: Props) {
-  const [assurances, setAssurances] = useState<Assurance[]>([])
-  const [showModal,  setShowModal]  = useState(false)
-  const [editAss,    setEditAss]    = useState<Assurance | undefined>()
+  const [assurances,  setAssurances]  = useState<Assurance[]>([])
+  const [showModal,   setShowModal]   = useState(false)
+  const [editAss,     setEditAss]     = useState<Assurance | undefined>()
   const [defaultBien, setDefaultBien] = useState('')
+  const [collapsed,   setCollapsed]   = useState<Set<string>>(new Set())
+
+  function toggleSoc(id: string) {
+    setCollapsed(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   useEffect(() => { loadAll() }, [refreshKey])
 
@@ -164,13 +173,17 @@ export function AssurancesView({ societes, biens, profiles, activeOwner, activeS
   function renderSoc(soc: Societe) {
     const socBiens = biens.filter(b => b.societe_id === soc.id)
     if (socBiens.length === 0) return null
+    const isCollapsed = collapsed.has(soc.id)
     return (
       <div key={soc.id} className="as-soc">
-        <div className="as-soc-hd">
+        <button className="as-soc-hd" onClick={() => toggleSoc(soc.id)}>
           <div className="as-soc-dot" style={{ background: soc.owner?.color_css }} />
           <span className="as-soc-name">{soc.name}</span>
-        </div>
-        {socBiens.map(renderBien)}
+          <svg className={`as-chevron${isCollapsed ? ' collapsed' : ''}`} viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 1l4 4 4-4" />
+          </svg>
+        </button>
+        {!isCollapsed && socBiens.map(renderBien)}
       </div>
     )
   }

@@ -516,9 +516,12 @@ button { font-family: inherit; }
 .as-group   { display: flex; flex-direction: column; gap: 16px; }
 
 .as-soc     { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
-.as-soc-hd  { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.as-soc-hd  { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface); width: 100%; text-align: left; border-left: none; border-right: none; border-top: none; cursor: pointer; transition: background .15s; }
+.as-soc-hd:hover { background: var(--sunken); }
 .as-soc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.as-soc-name { font-size: 14px; font-weight: 700; color: var(--tx1); }
+.as-soc-name { font-size: 14px; font-weight: 700; color: var(--tx1); flex: 1; }
+.as-chevron { color: var(--tx3); flex-shrink: 0; transition: transform .2s; }
+.as-chevron.collapsed { transform: rotate(-90deg); }
 
 .as-bien    { border-bottom: 1px solid var(--border); }
 .as-bien:last-child { border-bottom: none; }
