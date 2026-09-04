@@ -370,6 +370,29 @@ button { font-family: inherit; }
 .mf-select:disabled { opacity: .45; cursor: not-allowed; }
 .mf-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
 
+/* Custom batiment combobox */
+.mf-combo { position: relative; }
+.mf-input.mf-combo-open { border-color: var(--uL); background: var(--surface); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.mf-combo-list {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+  background: var(--surface); border: 1px solid var(--uL);
+  border-top: none; border-radius: 0 0 8px 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.10);
+  overflow: hidden;
+}
+.mf-combo-item {
+  display: block; width: 100%; text-align: left;
+  padding: 9px 12px; border: none; background: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+  color: var(--tx1); cursor: pointer; transition: background .08s;
+}
+.mf-combo-item:hover  { background: var(--sunken); }
+.mf-combo-item.sel    { background: var(--sunken); font-weight: 600; }
+.mf-combo-hint {
+  display: block; margin-top: 5px;
+  font-size: 12px; color: var(--tx3); font-style: italic;
+}
+
 .mf-assignees { display: flex; gap: 6px; flex-wrap: wrap; }
 .mf-assignee {
   display: flex; align-items: center; gap: 7px;

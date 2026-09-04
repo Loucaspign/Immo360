@@ -15,16 +15,19 @@ interface Props {
 export function BienModal({ open, onClose, onSaved, societes, batiments, defaultSoc = '', editBien }: Props) {
   const isEdit = !!editBien
 
-  const [socId,       setSocId]       = useState('')
+  const [socId,        setSocId]        = useState('')
   const [batimentName, setBatimentName] = useState('')
-  const [name,        setName]        = useState('')
-  const [lots,        setLots]        = useState('1')
-  const [saving,      setSaving]      = useState(false)
-  const [error,       setError]       = useState<string | null>(null)
-  const nameRef = useRef<HTMLInputElement>(null)
+  const [name,         setName]         = useState('')
+  const [lots,         setLots]         = useState('1')
+  const [saving,       setSaving]       = useState(false)
+  const [error,        setError]        = useState<string | null>(null)
+  const [dropOpen,     setDropOpen]     = useState(false)
+
+  const nameRef  = useRef<HTMLInputElement>(null)
+  const comboRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!open) return
+    if (!open) { setDropOpen(false); return }
     if (isEdit && editBien) {
       setSocId(editBien.societe_id)
       const bat = batiments.find(b => b.id === editBien.batiment_id)
@@ -40,16 +43,36 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
 
   useEffect(() => {
     if (!open) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { if (dropOpen) setDropOpen(false); else onClose() } }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [open, onClose, dropOpen])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropOpen) return
+    function handle(e: MouseEvent) {
+      if (comboRef.current && !comboRef.current.contains(e.target as Node)) setDropOpen(false)
+    }
+    document.addEventListener('mousedown', handle)
+    return () => document.removeEventListener('mousedown', handle)
+  }, [dropOpen])
 
   const socBatiments = batiments.filter(b => b.societe_id === socId)
+  const filtered = socBatiments.filter(b =>
+    !batimentName.trim() || b.name.toLowerCase().includes(batimentName.trim().toLowerCase())
+  )
+  const exactMatch = socBatiments.some(b => b.name.toLowerCase() === batimentName.trim().toLowerCase())
+  const willCreate = batimentName.trim() && !exactMatch
 
   function handleSocChange(id: string) {
     setSocId(id)
     setBatimentName('')
+  }
+
+  function pickBatiment(batName: string) {
+    setBatimentName(batName)
+    setDropOpen(false)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -57,7 +80,6 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
     if (!name.trim() || !socId) return
     setSaving(true); setError(null)
 
-    // Resolve batiment: find existing by name or create a new one
     let batimentId: string | null = null
     const trimmed = batimentName.trim()
     if (trimmed) {
@@ -114,16 +136,33 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
           {socId && (
             <div className="mf-group">
               <label className="mf-label">Bâtiment <span className="mf-opt">(optionnel)</span></label>
-              <datalist id="bm-batiments">
-                {socBatiments.map(b => <option key={b.id} value={b.name} />)}
-              </datalist>
-              <input
-                className="mf-input"
-                list="bm-batiments"
-                value={batimentName}
-                onChange={e => setBatimentName(e.target.value)}
-                placeholder={socBatiments.length > 0 ? 'Choisir ou créer un bâtiment…' : 'Nom du bâtiment (facultatif)'}
-              />
+              <div className="mf-combo" ref={comboRef}>
+                <input
+                  className={`mf-input${dropOpen ? ' mf-combo-open' : ''}`}
+                  value={batimentName}
+                  onChange={e => { setBatimentName(e.target.value); setDropOpen(true) }}
+                  onFocus={() => setDropOpen(true)}
+                  placeholder={socBatiments.length > 0 ? 'Choisir ou saisir un nom…' : 'Nom du bâtiment (facultatif)'}
+                  autoComplete="off"
+                />
+                {willCreate && (
+                  <span className="mf-combo-hint">Nouveau bâtiment « {batimentName.trim()} » sera créé</span>
+                )}
+                {dropOpen && filtered.length > 0 && (
+                  <div className="mf-combo-list">
+                    {filtered.map(b => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        className={`mf-combo-item${b.name.toLowerCase() === batimentName.trim().toLowerCase() ? ' sel' : ''}`}
+                        onMouseDown={() => pickBatiment(b.name)}
+                      >
+                        {b.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
