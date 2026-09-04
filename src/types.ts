@@ -1,5 +1,35 @@
 export type Category     = 'loyer' | 'fiscal' | 'tech' | 'admin'
 
+export type AssuranceType     = 'incendie' | 'protection_juridique' | 'omnium' | 'loyers_impayes' | 'rc_proprietaire' | 'rc_locataire' | 'autre'
+export type AssuranceFrequence = 'mensuel' | 'trimestriel' | 'annuel'
+export type AssuranceStatut   = 'actif' | 'resilie' | 'en_renouvellement'
+
+export interface Assurance {
+  id:                   string
+  bien_id:              string
+  type:                 AssuranceType
+  statut:               AssuranceStatut
+  compagnie:            string | null
+  numero_police:        string | null
+  courtier:             string | null
+  contact_courtier:     string | null
+  prime:                number | null
+  frequence_paiement:   AssuranceFrequence | null
+  date_debut:           string | null
+  date_echeance:        string | null
+  date_paiement:        string | null
+  preavis_mois:         number | null
+  franchise:            number | null
+  valeur_assuree:       number | null
+  perte_indirecte:      boolean
+  protection_juridique: boolean
+  abandon_recours:      boolean
+  chomage_immobilier:   boolean
+  notes:                string | null
+  active:               boolean
+  created_at:           string
+}
+
 export type ComptaFrequency = 'mensuel' | 'trimestriel' | 'semestriel' | 'annuel'
 export type ComptaType      = 'tva' | 'versement' | 'loyer' | 'bilan' | 'isoc' | 'autre'
 

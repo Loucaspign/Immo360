@@ -10,6 +10,7 @@ import { SocieteModal } from './components/SocieteModal'
 import { BienModal } from './components/BienModal'
 import { QuickList } from './components/QuickList'
 import { ComptaView } from './components/ComptaView'
+import { AssurancesView } from './components/AssurancesView'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -20,8 +21,9 @@ export default function App() {
   const [biens, setBiens] = useState<Bien[]>([])
   const [taches, setTaches] = useState<Tache[]>([])
 
-  const [view, setView] = useState<'tasks' | 'compta'>('tasks')
-  const [comptaRefreshKey, setComptaRefreshKey] = useState(0)
+  const [view, setView] = useState<'tasks' | 'compta' | 'assurances'>('tasks')
+  const [comptaRefreshKey,     setComptaRefreshKey]     = useState(0)
+  const [assurancesRefreshKey, setAssurancesRefreshKey] = useState(0)
 
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
@@ -82,6 +84,7 @@ export default function App() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'societes' },          loadData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compta_templates' }, () => setComptaRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compta_entries' },   () => setComptaRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'assurances' },       () => setAssurancesRefreshKey(k => k + 1))
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
@@ -139,8 +142,9 @@ export default function App() {
       />
       <main className="main">
         <div className="main-nav">
-          <button className={`main-nav-tab${view === 'tasks'  ? ' active' : ''}`} onClick={() => setView('tasks')}>Tâches</button>
-          <button className={`main-nav-tab${view === 'compta' ? ' active' : ''}`} onClick={() => setView('compta')}>Comptabilité</button>
+          <button className={`main-nav-tab${view === 'tasks'      ? ' active' : ''}`} onClick={() => setView('tasks')}>Tâches</button>
+          <button className={`main-nav-tab${view === 'compta'     ? ' active' : ''}`} onClick={() => setView('compta')}>Comptabilité</button>
+          <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
         </div>
 
         {view === 'tasks' && <>
@@ -165,6 +169,25 @@ export default function App() {
             activeSoc={activeSoc}
             onRefresh={loadData}
             onEdit={t => { setEditTache(t); setShowNewTask(true) }}
+          />
+        </>}
+
+        {view === 'assurances' && <>
+          <div className="mhdr">
+            <div className="hdr-row">
+              <div>
+                <h1 className="page-title">Assurances</h1>
+                <div className="hdr-meta">Polices d'assurance par bien</div>
+              </div>
+            </div>
+          </div>
+          <AssurancesView
+            societes={societes}
+            biens={biens}
+            profiles={profiles}
+            activeOwner={activeOwner}
+            activeSoc={activeSoc}
+            refreshKey={assurancesRefreshKey}
           />
         </>}
 

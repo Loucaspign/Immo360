@@ -141,6 +141,37 @@ create policy "compta_entries: full access" on public.compta_entries to authenti
 -- grant select, insert, update, delete on public.compta_entries to authenticated;
 
 
+-- ── Assurances ────────────────────────────────────────────────
+create table public.assurances (
+  id                   uuid primary key default gen_random_uuid(),
+  bien_id              uuid references public.biens(id) on delete cascade not null,
+  type                 text not null check (type in ('incendie','protection_juridique','omnium','loyers_impayes','rc_proprietaire','rc_locataire','autre')),
+  statut               text not null default 'actif' check (statut in ('actif','resilie','en_renouvellement')),
+  compagnie            text,
+  numero_police        text,
+  courtier             text,
+  contact_courtier     text,
+  prime                numeric(10,2),
+  frequence_paiement   text check (frequence_paiement in ('mensuel','trimestriel','annuel')),
+  date_debut           date,
+  date_echeance        date,
+  date_paiement        date,
+  preavis_mois         integer default 3,
+  franchise            numeric(10,2),
+  valeur_assuree       numeric(10,2),
+  perte_indirecte      boolean not null default false,
+  protection_juridique boolean not null default false,
+  abandon_recours      boolean not null default false,
+  chomage_immobilier   boolean not null default false,
+  notes                text,
+  active               boolean not null default true,
+  created_at           timestamptz default now()
+);
+alter table public.assurances enable row level security;
+create policy "assurances: full access" on public.assurances to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.assurances to authenticated;
+
+
 -- ══════════════════════════════════════════════════════════════
 --  Données de départ — à adapter avec les vrais UUIDs des comptes
 --  Créer d'abord les 3 comptes via Supabase Dashboard → Authentication
