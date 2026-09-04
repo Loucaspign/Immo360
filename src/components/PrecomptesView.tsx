@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Societe, Bien, Batiment, Profile, Precompte } from '../types'
 import { PrecompteModal } from './PrecompteModal'
-import { BatimentModal } from './BatimentModal'
 
 function fmtAmt(n: number | null) {
   if (n == null) return '—'
@@ -53,9 +52,6 @@ export function PrecomptesView({ societes, biens, batiments, profiles, activeOwn
   const [editPc,           setEditPc]           = useState<Precompte | undefined>()
   const [defaultBien,      setDefaultBien]      = useState('')
   const [defaultBatiment,  setDefaultBatiment]  = useState('')
-  const [showBatModal,     setShowBatModal]     = useState(false)
-  const [editBat,          setEditBat]          = useState<Batiment | undefined>()
-  const [batSocId,         setBatSocId]         = useState('')
   const [collapsed,        setCollapsed]        = useState<Set<string>>(new Set())
   const [toggling,         setToggling]         = useState<string | null>(null)
 
@@ -88,11 +84,6 @@ export function PrecomptesView({ societes, biens, batiments, profiles, activeOwn
     if (!window.confirm('Supprimer cet enregistrement ?')) return
     await supabase.from('precomptes').update({ active: false }).eq('id', pc.id)
     setPrecomptes(prev => prev.filter(c => c.id !== pc.id))
-  }
-
-  async function deleteBat(bat: Batiment) {
-    if (!window.confirm(`Supprimer le bâtiment « ${bat.name} » ? Les biens seront dissociés mais conservés.`)) return
-    await supabase.from('batiments').delete().eq('id', bat.id)
   }
 
   const visibleSocs = societes.filter(s => {
@@ -156,20 +147,15 @@ export function PrecomptesView({ societes, biens, batiments, profiles, activeOwn
     const isCollapsed = collapsed.has(soc.id)
     return (
       <div key={soc.id} className="ca-soc">
-        <div className="ca-soc-hd">
-          <button className="ca-soc-toggle" onClick={() => toggleSoc(soc.id)}>
-            <div className="ca-soc-dot" style={{ background: soc.owner?.color_css }} />
-            <span className="ca-soc-name">{soc.name}</span>
-            <svg className={`ca-chevron${isCollapsed ? ' collapsed' : ''}`}
-              viewBox="0 0 10 6" width="10" height="6" fill="none"
-              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M1 1l4 4 4-4" />
-            </svg>
-          </button>
-          <button className="ca-add-bat-btn" onClick={() => { setBatSocId(soc.id); setEditBat(undefined); setShowBatModal(true) }}>
-            + Bâtiment
-          </button>
-        </div>
+        <button className="ca-soc-hd" onClick={() => toggleSoc(soc.id)}>
+          <div className="ca-soc-dot" style={{ background: soc.owner?.color_css }} />
+          <span className="ca-soc-name">{soc.name}</span>
+          <svg className={`ca-chevron${isCollapsed ? ' collapsed' : ''}`}
+            viewBox="0 0 10 6" width="10" height="6" fill="none"
+            stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 1l4 4 4-4" />
+          </svg>
+        </button>
 
         {!isCollapsed && (
           <div className="ca-rows">
@@ -182,16 +168,6 @@ export function PrecomptesView({ societes, biens, batiments, profiles, activeOwn
                   <div className="ca-row-label">
                     <div className="ca-bat-header">
                       <span className="ca-bat-name">{bat.name}</span>
-                      <div className="ca-bat-acts">
-                        <button className="ca-act-btn" title="Renommer"
-                          onClick={() => { setEditBat(bat); setBatSocId(soc.id); setShowBatModal(true) }}>
-                          <IconPencil />
-                        </button>
-                        <button className="ca-act-btn danger" title="Supprimer le bâtiment"
-                          onClick={() => deleteBat(bat)}>
-                          <IconTrash />
-                        </button>
-                      </div>
                     </div>
                     {batBiens.length > 0 && (
                       <div className="ca-bat-lots">
@@ -269,14 +245,6 @@ export function PrecomptesView({ societes, biens, batiments, profiles, activeOwn
         />
       )}
 
-      {showBatModal && (
-        <BatimentModal
-          societeId={batSocId}
-          editBatiment={editBat}
-          onClose={() => { setShowBatModal(false); setEditBat(undefined) }}
-          onSaved={() => {}}
-        />
-      )}
     </div>
   )
 }

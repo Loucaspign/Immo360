@@ -8,6 +8,7 @@ import { TaskList } from './components/TaskList'
 import { NewTaskModal } from './components/NewTaskModal'
 import { SocieteModal } from './components/SocieteModal'
 import { BienModal } from './components/BienModal'
+import { BatimentModal } from './components/BatimentModal'
 import { QuickList } from './components/QuickList'
 import { ComptaView } from './components/ComptaView'
 import { AssurancesView } from './components/AssurancesView'
@@ -39,9 +40,12 @@ export default function App() {
   const [showSocModal,  setShowSocModal]  = useState(false)
   const [socOwnerDef,   setSocOwnerDef]   = useState('')
   const [editSociete,   setEditSociete]   = useState<import('./types').Societe | undefined>()
-  const [showBienModal, setShowBienModal] = useState(false)
-  const [bienSocDef,    setBienSocDef]    = useState('')
-  const [editBien,      setEditBien]      = useState<import('./types').Bien | undefined>()
+  const [showBienModal,  setShowBienModal]  = useState(false)
+  const [bienSocDef,     setBienSocDef]     = useState('')
+  const [editBien,       setEditBien]       = useState<import('./types').Bien | undefined>()
+  const [showBatModal,   setShowBatModal]   = useState(false)
+  const [batSocId,       setBatSocId]       = useState('')
+  const [editBat,        setEditBat]        = useState<import('./types').Batiment | undefined>()
 
   // Auth
   useEffect(() => {
@@ -138,6 +142,7 @@ export default function App() {
         profiles={profiles}
         societes={societes}
         biens={biens}
+        batiments={batiments}
         taches={taches}
         activeOwner={activeOwner}
         activeSoc={activeSoc}
@@ -151,6 +156,8 @@ export default function App() {
         onEditSociete={s => { setEditSociete(s); setShowSocModal(true) }}
         onAddBien={socId => { setBienSocDef(socId); setEditBien(undefined); setShowBienModal(true) }}
         onEditBien={b => { setEditBien(b); setShowBienModal(true) }}
+        onAddBatiment={socId => { setBatSocId(socId); setEditBat(undefined); setShowBatModal(true) }}
+        onEditBatiment={b => { setEditBat(b); setBatSocId(b.societe_id); setShowBatModal(true) }}
       />
       <main className="main">
         <div className="main-nav">
@@ -290,6 +297,15 @@ export default function App() {
         defaultSoc={bienSocDef}
         editBien={editBien}
       />
+
+      {showBatModal && (
+        <BatimentModal
+          societeId={batSocId}
+          editBatiment={editBat}
+          onClose={() => { setShowBatModal(false); setEditBat(undefined) }}
+          onSaved={loadData}
+        />
+      )}
     </div>
   )
 }

@@ -1,25 +1,28 @@
 import { useState } from 'react'
-import type { Profile, Societe, Bien, Tache } from '../types'
+import type { Profile, Societe, Bien, Batiment, Tache } from '../types'
 import { getDisplayStatus } from '../lib/utils'
 import { supabase } from '../lib/supabase'
 
 interface Props {
-  profiles:      Profile[]
-  societes:      Societe[]
-  biens:         Bien[]
-  taches:        Tache[]
-  activeOwner:   string
-  activeSoc:     string
-  activeBien:    string
-  onOwnerChange: (id: string) => void
-  onSocChange:   (id: string) => void
-  onBienChange:  (id: string) => void
-  onSignOut:     () => void
-  onRefresh:     () => void
-  onAddSociete:  (ownerId: string) => void
-  onEditSociete: (s: Societe) => void
-  onAddBien:     (societeId: string) => void
-  onEditBien:    (b: Bien) => void
+  profiles:        Profile[]
+  societes:        Societe[]
+  biens:           Bien[]
+  batiments:       Batiment[]
+  taches:          Tache[]
+  activeOwner:     string
+  activeSoc:       string
+  activeBien:      string
+  onOwnerChange:   (id: string) => void
+  onSocChange:     (id: string) => void
+  onBienChange:    (id: string) => void
+  onSignOut:       () => void
+  onRefresh:       () => void
+  onAddSociete:    (ownerId: string) => void
+  onEditSociete:   (s: Societe) => void
+  onAddBien:       (societeId: string) => void
+  onEditBien:      (b: Bien) => void
+  onAddBatiment:   (societeId: string) => void
+  onEditBatiment:  (b: Batiment) => void
 }
 
 function IconPlus() {
@@ -47,10 +50,11 @@ function IconTrash() {
 }
 
 export function Sidebar({
-  profiles, societes, biens, taches,
+  profiles, societes, biens, batiments, taches,
   activeOwner, activeSoc, activeBien,
   onOwnerChange, onSocChange, onBienChange, onSignOut,
   onRefresh, onAddSociete, onEditSociete, onAddBien, onEditBien,
+  onAddBatiment, onEditBatiment,
 }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -77,6 +81,15 @@ export function Sidebar({
     setDeletingId(b.id)
     await supabase.from('biens').delete().eq('id', b.id)
     if (activeBien === b.id) onBienChange('all')
+    setDeletingId(null)
+    onRefresh()
+  }
+
+  async function deleteBatiment(e: React.MouseEvent, bat: Batiment) {
+    e.stopPropagation()
+    if (!window.confirm(`Supprimer le bâtiment « ${bat.name} » ? Les biens seront dissociés mais conservés.`)) return
+    setDeletingId(bat.id)
+    await supabase.from('batiments').delete().eq('id', bat.id)
     setDeletingId(null)
     onRefresh()
   }
@@ -131,7 +144,8 @@ export function Sidebar({
               {profileSocs.map(s => {
                 const isOpen = activeSoc === s.id
                 const count  = taches.filter(t => t.societe_id === s.id && t.status !== 'done').length
-                const socBiens = biens.filter(b => b.societe_id === s.id)
+                const socBatiments = batiments.filter(b => b.societe_id === s.id)
+                const socBiens     = biens.filter(b => b.societe_id === s.id)
 
                 return (
                   <div key={s.id}>
@@ -161,42 +175,71 @@ export function Sidebar({
 
                     {isOpen && (
                       <div className="bien-list">
-                        {socBiens.map(b => {
+                        {/* Batiments with their biens */}
+                        {socBatiments.map(bat => {
+                          const batBiens = socBiens.filter(b => b.batiment_id === bat.id)
+                          return (
+                            <div key={bat.id} className={`sb-bat${deletingId === bat.id ? ' deleting' : ''}`}>
+                              <div className="sb-bat-hdr">
+                                <span className="sb-bat-name">{bat.name}</span>
+                                <button
+                                  className="sb-del-btn"
+                                  onClick={e => { e.stopPropagation(); onEditBatiment(bat) }}
+                                  title="Renommer"
+                                >
+                                  <IconPencil />
+                                </button>
+                                <button
+                                  className="sb-del-btn"
+                                  onClick={e => deleteBatiment(e, bat)}
+                                  title="Supprimer"
+                                >
+                                  <IconTrash />
+                                </button>
+                              </div>
+                              {batBiens.map(b => {
+                                const bCnt = taches.filter(t => t.bien_id === b.id && t.status !== 'done').length
+                                return (
+                                  <div
+                                    key={b.id}
+                                    className={`bien-row sb-bat-bien${activeBien === b.id ? ' sel' : ''}${deletingId === b.id ? ' deleting' : ''}`}
+                                    onClick={e => { e.stopPropagation(); onBienChange(activeBien === b.id ? 'all' : b.id) }}
+                                  >
+                                    <span className="bien-name">{b.name}</span>
+                                    <span className="bien-lots">{b.lots_count} lot{b.lots_count > 1 ? 's' : ''}</span>
+                                    {bCnt > 0 && <span className="bien-badge">{bCnt}</span>}
+                                    <button className="sb-del-btn" onClick={e => { e.stopPropagation(); onEditBien(b) }} title="Modifier"><IconPencil /></button>
+                                    <button className="sb-del-btn" onClick={e => deleteBien(e, b)} title="Supprimer"><IconTrash /></button>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )
+                        })}
+
+                        {/* Standalone biens (not in any batiment) */}
+                        {socBiens.filter(b => !b.batiment_id).map(b => {
                           const bCnt = taches.filter(t => t.bien_id === b.id && t.status !== 'done').length
                           return (
                             <div
                               key={b.id}
                               className={`bien-row${activeBien === b.id ? ' sel' : ''}${deletingId === b.id ? ' deleting' : ''}`}
-                              onClick={e => {
-                                e.stopPropagation()
-                                onBienChange(activeBien === b.id ? 'all' : b.id)
-                              }}
+                              onClick={e => { e.stopPropagation(); onBienChange(activeBien === b.id ? 'all' : b.id) }}
                             >
                               <span className="bien-name">{b.name}</span>
                               <span className="bien-lots">{b.lots_count} lot{b.lots_count > 1 ? 's' : ''}</span>
                               {bCnt > 0 && <span className="bien-badge">{bCnt}</span>}
-                              <button
-                                className="sb-del-btn"
-                                onClick={e => { e.stopPropagation(); onEditBien(b) }}
-                                title="Modifier"
-                              >
-                                <IconPencil />
-                              </button>
-                              <button
-                                className="sb-del-btn"
-                                onClick={e => deleteBien(e, b)}
-                                title="Supprimer"
-                              >
-                                <IconTrash />
-                              </button>
+                              <button className="sb-del-btn" onClick={e => { e.stopPropagation(); onEditBien(b) }} title="Modifier"><IconPencil /></button>
+                              <button className="sb-del-btn" onClick={e => deleteBien(e, b)} title="Supprimer"><IconTrash /></button>
                             </div>
                           )
                         })}
-                        <button
-                          className="bien-add-btn"
-                          onClick={e => { e.stopPropagation(); onAddBien(s.id) }}
-                        >
+
+                        <button className="bien-add-btn" onClick={e => { e.stopPropagation(); onAddBien(s.id) }}>
                           <IconPlus /> Ajouter un bien
+                        </button>
+                        <button className="bien-add-btn" onClick={e => { e.stopPropagation(); onAddBatiment(s.id) }}>
+                          <IconPlus /> Ajouter un bâtiment
                         </button>
                       </div>
                     )}
