@@ -329,3 +329,18 @@ create unique index if not exists precomptes_bien_annee_uidx
   on public.precomptes(bien_id, annee) where bien_id is not null;
 create unique index if not exists precomptes_bat_annee_uidx
   on public.precomptes(batiment_id, annee) where batiment_id is not null;
+
+-- ── Pense-bête ────────────────────────────────────────────────
+-- Notes rapides / post-its virtuels, optionnellement liés à une société/bien
+create table public.pense_betes (
+  id         uuid primary key default gen_random_uuid(),
+  content    text not null,
+  color      text not null default 'yellow' check (color in ('yellow','pink','mint','sky','lavender')),
+  societe_id uuid references public.societes(id) on delete set null,
+  bien_id    uuid references public.biens(id) on delete set null,
+  active     boolean not null default true,
+  created_at timestamptz default now()
+);
+alter table public.pense_betes enable row level security;
+create policy "pense_betes: full access" on public.pense_betes to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.pense_betes to authenticated;

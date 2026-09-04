@@ -138,6 +138,16 @@ export interface Bien {
   created_at:  string
 }
 
+export interface PenseBete {
+  id:         string
+  content:    string
+  color:      string
+  societe_id: string | null
+  bien_id:    string | null
+  active:     boolean
+  created_at: string
+}
+
 export interface Tache {
   id:          string
   societe_id:  string

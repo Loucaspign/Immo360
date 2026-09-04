@@ -14,6 +14,7 @@ import { ComptaView } from './components/ComptaView'
 import { AssurancesView } from './components/AssurancesView'
 import { LoyersView } from './components/LoyersView'
 import { PrecomptesView } from './components/PrecomptesView'
+import { PenseBeteView } from './components/PenseBeteView'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -25,11 +26,12 @@ export default function App() {
   const [batiments, setBatiments] = useState<Batiment[]>([])
   const [taches,    setTaches]    = useState<Tache[]>([])
 
-  const [view, setView] = useState<'tasks' | 'compta' | 'assurances' | 'loyers' | 'cadastres'>('tasks')
+  const [view, setView] = useState<'tasks' | 'compta' | 'assurances' | 'loyers' | 'cadastres' | 'pensebete'>('tasks')
   const [comptaRefreshKey,     setComptaRefreshKey]     = useState(0)
   const [assurancesRefreshKey, setAssurancesRefreshKey] = useState(0)
   const [loyersRefreshKey,     setLoyersRefreshKey]     = useState(0)
   const [precomptesRefreshKey, setPrecomptesRefreshKey] = useState(0)
+  const [penseBeteRefreshKey,  setPenseBeteRefreshKey]  = useState(0)
 
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
@@ -101,6 +103,7 @@ export default function App() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_impayes' },   () => setLoyersRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'batiments' },       loadData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'precomptes' },      () => setPrecomptesRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pense_betes' },    () => setPenseBeteRefreshKey(k => k + 1))
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
@@ -166,6 +169,8 @@ export default function App() {
           <span className="main-nav-sep" />
           <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
           <button className={`main-nav-tab${view === 'cadastres'  ? ' active' : ''}`} onClick={() => setView('cadastres')}>Précomptes</button>
+          <span className="main-nav-sep" />
+          <button className={`main-nav-tab${view === 'pensebete'  ? ' active' : ''}`} onClick={() => setView('pensebete')}>Pense-bête</button>
         </div>
 
         <div className="tab-panel" hidden={view !== 'tasks'}>
@@ -261,6 +266,21 @@ export default function App() {
             activeOwner={activeOwner}
             activeSoc={activeSoc}
             refreshKey={precomptesRefreshKey}
+          />
+        </div>
+        <div className="tab-panel" hidden={view !== 'pensebete'}>
+          <div className="mhdr">
+            <div className="hdr-row">
+              <div>
+                <h1 className="page-title">Pense-bête</h1>
+                <div className="hdr-meta">Notes rapides et rappels informels</div>
+              </div>
+            </div>
+          </div>
+          <PenseBeteView
+            societes={societes}
+            biens={biens}
+            refreshKey={penseBeteRefreshKey}
           />
         </div>
       </main>
