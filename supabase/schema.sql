@@ -290,7 +290,16 @@ create table if not exists public.batiments (
   created_at timestamptz default now()
 );
 alter table public.batiments enable row level security;
-create policy if not exists "batiments: full access" on public.batiments to authenticated using (true) with check (true);
+do $$ begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'batiments'
+      and policyname = 'batiments: full access'
+  ) then
+    create policy "batiments: full access"
+      on public.batiments to authenticated using (true) with check (true);
+  end if;
+end $$;
 grant select, insert, update, delete on public.batiments to authenticated;
 
 -- 2. Ajouter batiment_id sur biens
