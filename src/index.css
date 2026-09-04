@@ -501,11 +501,6 @@ button { font-family: inherit; }
 .ct-chip.soon         { background: #FFFBEB; border-color: #FCD34D; color: #92400E; }
 .ct-chip:disabled     { opacity: .6; cursor: default; }
 
-.ct-row-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ct-next-date { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: var(--sunken); color: var(--tx2); border: 1px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.ct-next-date.late { background: #FEF2F2; border-color: #FCA5A5; color: var(--danger); }
-.ct-next-date.soon { background: #FFFBEB; border-color: #FCD34D; color: #92400E; }
-
 .ct-row-acts { display: flex; gap: 4px; flex-shrink: 0; }
 .ct-act-btn {
   display: grid; place-items: center;
