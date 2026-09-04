@@ -15,23 +15,24 @@ interface Props {
 export function BienModal({ open, onClose, onSaved, societes, batiments, defaultSoc = '', editBien }: Props) {
   const isEdit = !!editBien
 
-  const [socId,     setSocId]     = useState('')
-  const [batimentId, setBatimentId] = useState<string>('')
-  const [name,      setName]      = useState('')
-  const [lots,      setLots]      = useState('1')
-  const [saving,    setSaving]    = useState(false)
-  const [error,     setError]     = useState<string | null>(null)
+  const [socId,       setSocId]       = useState('')
+  const [batimentName, setBatimentName] = useState('')
+  const [name,        setName]        = useState('')
+  const [lots,        setLots]        = useState('1')
+  const [saving,      setSaving]      = useState(false)
+  const [error,       setError]       = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
     if (isEdit && editBien) {
       setSocId(editBien.societe_id)
-      setBatimentId(editBien.batiment_id ?? '')
+      const bat = batiments.find(b => b.id === editBien.batiment_id)
+      setBatimentName(bat?.name ?? '')
       setName(editBien.name)
       setLots(String(editBien.lots_count))
     } else {
-      setSocId(defaultSoc); setBatimentId(''); setName(''); setLots('1')
+      setSocId(defaultSoc); setBatimentName(''); setName(''); setLots('1')
     }
     setError(null)
     setTimeout(() => nameRef.current?.focus(), 60)
@@ -46,10 +47,9 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
 
   const socBatiments = batiments.filter(b => b.societe_id === socId)
 
-  // Reset batiment if société changes
   function handleSocChange(id: string) {
     setSocId(id)
-    setBatimentId('')
+    setBatimentName('')
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -57,9 +57,27 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
     if (!name.trim() || !socId) return
     setSaving(true); setError(null)
 
+    // Resolve batiment: find existing by name or create a new one
+    let batimentId: string | null = null
+    const trimmed = batimentName.trim()
+    if (trimmed) {
+      const existing = socBatiments.find(b => b.name.toLowerCase() === trimmed.toLowerCase())
+      if (existing) {
+        batimentId = existing.id
+      } else {
+        const { data: newBat, error: batErr } = await supabase
+          .from('batiments')
+          .insert({ societe_id: socId, name: trimmed })
+          .select()
+          .single()
+        if (batErr) { setError(batErr.message); setSaving(false); return }
+        batimentId = newBat.id
+      }
+    }
+
     const payload = {
       societe_id:  socId,
-      batiment_id: batimentId || null,
+      batiment_id: batimentId,
       name:        name.trim(),
       lots_count:  parseInt(lots) || 1,
     }
@@ -93,13 +111,19 @@ export function BienModal({ open, onClose, onSaved, societes, batiments, default
             </select>
           </div>
 
-          {socId && socBatiments.length > 0 && (
+          {socId && (
             <div className="mf-group">
               <label className="mf-label">Bâtiment <span className="mf-opt">(optionnel)</span></label>
-              <select className="mf-select" value={batimentId} onChange={e => setBatimentId(e.target.value)}>
-                <option value="">— Aucun (bien standalone) —</option>
-                {socBatiments.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+              <datalist id="bm-batiments">
+                {socBatiments.map(b => <option key={b.id} value={b.name} />)}
+              </datalist>
+              <input
+                className="mf-input"
+                list="bm-batiments"
+                value={batimentName}
+                onChange={e => setBatimentName(e.target.value)}
+                placeholder={socBatiments.length > 0 ? 'Choisir ou créer un bâtiment…' : 'Nom du bâtiment (facultatif)'}
+              />
             </div>
           )}
 

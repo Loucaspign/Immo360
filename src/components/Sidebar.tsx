@@ -21,7 +21,6 @@ interface Props {
   onEditSociete:   (s: Societe) => void
   onAddBien:       (societeId: string) => void
   onEditBien:      (b: Bien) => void
-  onAddBatiment:   (societeId: string) => void
   onEditBatiment:  (b: Batiment) => void
 }
 
@@ -54,7 +53,7 @@ export function Sidebar({
   activeOwner, activeSoc, activeBien,
   onOwnerChange, onSocChange, onBienChange, onSignOut,
   onRefresh, onAddSociete, onEditSociete, onAddBien, onEditBien,
-  onAddBatiment, onEditBatiment,
+  onEditBatiment,
 }: Props) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -237,9 +236,6 @@ export function Sidebar({
 
                         <button className="bien-add-btn" onClick={e => { e.stopPropagation(); onAddBien(s.id) }}>
                           <IconPlus /> Ajouter un bien
-                        </button>
-                        <button className="bien-add-btn" onClick={e => { e.stopPropagation(); onAddBatiment(s.id) }}>
-                          <IconPlus /> Ajouter un bâtiment
                         </button>
                       </div>
                     )}

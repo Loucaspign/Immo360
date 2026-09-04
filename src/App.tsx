@@ -156,7 +156,6 @@ export default function App() {
         onEditSociete={s => { setEditSociete(s); setShowSocModal(true) }}
         onAddBien={socId => { setBienSocDef(socId); setEditBien(undefined); setShowBienModal(true) }}
         onEditBien={b => { setEditBien(b); setShowBienModal(true) }}
-        onAddBatiment={socId => { setBatSocId(socId); setEditBat(undefined); setShowBatModal(true) }}
         onEditBatiment={b => { setEditBat(b); setBatSocId(b.societe_id); setShowBatModal(true) }}
       />
       <main className="main">
