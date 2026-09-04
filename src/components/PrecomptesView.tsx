@@ -170,8 +170,10 @@ export function PrecomptesView({ societes, biens, batiments, profiles, activeOwn
                       <span className="ca-bat-name">{bat.name}</span>
                     </div>
                     {batBiens.length > 0 && (
-                      <div className="ca-bat-lots">
-                        {batBiens.map(b => b.name).join(' · ')}
+                      <div className="ca-bat-biens">
+                        {batBiens.map(b => (
+                          <span key={b.id} className="ca-bat-bien-chip">{b.name}</span>
+                        ))}
                       </div>
                     )}
                   </div>

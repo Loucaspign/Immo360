@@ -892,7 +892,13 @@ button { font-family: inherit; }
   font-size: 13px; font-weight: 700; color: var(--tx1); white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; flex: 1;
 }
-.ca-bat-lots { font-size: 11px; color: var(--tx3); white-space: normal; line-height: 1.4; }
+.ca-bat-biens { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.ca-bat-bien-chip {
+  font-size: 11px; font-weight: 500; color: var(--tx2);
+  background: var(--sunken); border: 1px solid var(--border);
+  border-radius: 5px; padding: 2px 7px; white-space: nowrap;
+  line-height: 1.5;
+}
 .ca-bat-acts { display: flex; gap: 2px; flex-shrink: 0; }
 
 .ca-add-row-btn {
