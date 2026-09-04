@@ -239,10 +239,10 @@ export function AssurancesView({ societes, biens, batiments, profiles, activeOwn
           </svg>
         </button>
         {!isCollapsed && (
-          <>
+          <div className="as-soc-body">
             {socBatiments.map(renderBatiment)}
             {socStandalone.map(b => renderBien(b, false))}
-          </>
+          </div>
         )}
       </div>
     )
