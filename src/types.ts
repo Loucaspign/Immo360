@@ -87,7 +87,7 @@ export interface ComptaEntry {
   notes:       string | null
   created_at:  string
 }
-export interface Cadastre {
+export interface Precompte {
   id:            string
   bien_id:       string
   annee:         number

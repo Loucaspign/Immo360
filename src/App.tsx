@@ -12,7 +12,7 @@ import { QuickList } from './components/QuickList'
 import { ComptaView } from './components/ComptaView'
 import { AssurancesView } from './components/AssurancesView'
 import { LoyersView } from './components/LoyersView'
-import { CadastresView } from './components/CadastresView'
+import { PrecomptesView } from './components/PrecomptesView'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -27,7 +27,7 @@ export default function App() {
   const [comptaRefreshKey,     setComptaRefreshKey]     = useState(0)
   const [assurancesRefreshKey, setAssurancesRefreshKey] = useState(0)
   const [loyersRefreshKey,     setLoyersRefreshKey]     = useState(0)
-  const [cadastresRefreshKey,  setCadastresRefreshKey]  = useState(0)
+  const [precomptesRefreshKey, setPrecomptesRefreshKey] = useState(0)
 
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
@@ -92,7 +92,7 @@ export default function App() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'locataires' },      () => setLoyersRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_paiements' }, () => setLoyersRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_impayes' },   () => setLoyersRefreshKey(k => k + 1))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'cadastres' },       () => setCadastresRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'precomptes' },      () => setPrecomptesRefreshKey(k => k + 1))
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
@@ -154,7 +154,7 @@ export default function App() {
           <button className={`main-nav-tab${view === 'compta'     ? ' active' : ''}`} onClick={() => setView('compta')}>Comptabilité</button>
           <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
           <button className={`main-nav-tab${view === 'loyers'     ? ' active' : ''}`} onClick={() => setView('loyers')}>Loyers</button>
-          <button className={`main-nav-tab${view === 'cadastres'  ? ' active' : ''}`} onClick={() => setView('cadastres')}>Cadastres</button>
+          <button className={`main-nav-tab${view === 'cadastres'  ? ' active' : ''}`} onClick={() => setView('cadastres')}>Précomptes</button>
         </div>
 
         <div className="tab-panel" hidden={view !== 'tasks'}>
@@ -236,18 +236,18 @@ export default function App() {
           <div className="mhdr">
             <div className="hdr-row">
               <div>
-                <h1 className="page-title">Cadastres</h1>
+                <h1 className="page-title">Précomptes immobiliers</h1>
                 <div className="hdr-meta">Précompte immobilier par bien</div>
               </div>
             </div>
           </div>
-          <CadastresView
+          <PrecomptesView
             societes={societes}
             biens={biens}
             profiles={profiles}
             activeOwner={activeOwner}
             activeSoc={activeSoc}
-            refreshKey={cadastresRefreshKey}
+            refreshKey={precomptesRefreshKey}
           />
         </div>
       </main>

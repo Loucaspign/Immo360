@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Societe, Bien, Profile, Cadastre } from '../types'
-import { CadastreModal } from './CadastreModal'
+import type { Societe, Bien, Profile, Precompte } from '../types'
+import { PrecompteModal } from './PrecompteModal'
 
 function fmtAmt(n: number | null) {
   if (n == null) return '—'
@@ -45,11 +45,11 @@ interface Props {
   refreshKey:  number
 }
 
-export function CadastresView({ societes, biens, profiles, activeOwner, activeSoc, refreshKey }: Props) {
-  const [cadastres,   setCadastres]   = useState<Cadastre[]>([])
+export function PrecomptesView({ societes, biens, profiles, activeOwner, activeSoc, refreshKey }: Props) {
+  const [precomptes,  setPrecomptes]  = useState<Precompte[]>([])
   const [year,        setYear]        = useState(new Date().getFullYear())
   const [showModal,   setShowModal]   = useState(false)
-  const [editCad,     setEditCad]     = useState<Cadastre | undefined>()
+  const [editPc,      setEditPc]      = useState<Precompte | undefined>()
   const [defaultBien, setDefaultBien] = useState('')
   const [collapsed,   setCollapsed]   = useState<Set<string>>(new Set())
   const [toggling,    setToggling]    = useState<string | null>(null)
@@ -65,24 +65,24 @@ export function CadastresView({ societes, biens, profiles, activeOwner, activeSo
   useEffect(() => { loadAll() }, [refreshKey])
 
   async function loadAll() {
-    const { data } = await supabase.from('cadastres').select('*').eq('active', true)
-    if (data) setCadastres(data as Cadastre[])
+    const { data } = await supabase.from('precomptes').select('*').eq('active', true)
+    if (data) setPrecomptes(data as Precompte[])
   }
 
-  async function toggleField(cad: Cadastre, field: 'paye' | 'facture') {
-    const uid = `${cad.id}::${field}`
+  async function toggleField(pc: Precompte, field: 'paye' | 'facture') {
+    const uid = `${pc.id}::${field}`
     if (toggling === uid) return
     setToggling(uid)
-    const update = { [field]: !cad[field] }
-    const { error } = await supabase.from('cadastres').update(update).eq('id', cad.id)
-    if (!error) setCadastres(prev => prev.map(c => c.id === cad.id ? { ...c, ...update } : c))
+    const update = { [field]: !pc[field] }
+    const { error } = await supabase.from('precomptes').update(update).eq('id', pc.id)
+    if (!error) setPrecomptes(prev => prev.map(c => c.id === pc.id ? { ...c, ...update } : c))
     setToggling(null)
   }
 
-  async function deleteCad(cad: Cadastre) {
+  async function deletePc(pc: Precompte) {
     if (!window.confirm('Supprimer cet enregistrement ?')) return
-    await supabase.from('cadastres').update({ active: false }).eq('id', cad.id)
-    setCadastres(prev => prev.filter(c => c.id !== cad.id))
+    await supabase.from('precomptes').update({ active: false }).eq('id', pc.id)
+    setPrecomptes(prev => prev.filter(c => c.id !== pc.id))
   }
 
   const visibleSocs = societes.filter(s => {
@@ -121,51 +121,51 @@ export function CadastresView({ societes, biens, profiles, activeOwner, activeSo
         {!isCollapsed && (
           <div className="ca-rows">
             {socBiens.map(bien => {
-              const cad = cadastres.find(c => c.bien_id === bien.id && c.annee === year)
+              const pc = precomptes.find(c => c.bien_id === bien.id && c.annee === year)
               return (
                 <div key={bien.id} className="ca-row">
                   <span className="ca-bien-name">{bien.name}</span>
 
-                  {cad ? (
+                  {pc ? (
                     <>
-                      <span className="ca-amount">{fmtAmt(cad.montant)}</span>
-                      <span className="ca-date">{fmtDate(cad.date_paiement)}</span>
+                      <span className="ca-amount">{fmtAmt(pc.montant)}</span>
+                      <span className="ca-date">{fmtDate(pc.date_paiement)}</span>
 
-                      <span className={`ca-charge ${cad.a_refacturer ? 'refac' : 'notre'}`}>
-                        {cad.a_refacturer ? 'À refacturer' : 'Notre charge'}
+                      <span className={`ca-charge ${pc.a_refacturer ? 'refac' : 'notre'}`}>
+                        {pc.a_refacturer ? 'À refacturer' : 'Notre charge'}
                       </span>
 
                       <div className="ca-chips">
                         <button
-                          className={`ca-chip${cad.paye ? ' done' : ''}`}
-                          onClick={() => toggleField(cad, 'paye')}
-                          disabled={toggling === `${cad.id}::paye`}
-                          title={cad.paye ? 'Marquer non payé' : 'Marquer payé'}>
-                          {cad.paye && <CheckIcon />} Payé
+                          className={`ca-chip${pc.paye ? ' done' : ''}`}
+                          onClick={() => toggleField(pc, 'paye')}
+                          disabled={toggling === `${pc.id}::paye`}
+                          title={pc.paye ? 'Marquer non payé' : 'Marquer payé'}>
+                          {pc.paye && <CheckIcon />} Payé
                         </button>
-                        {cad.a_refacturer && (
+                        {pc.a_refacturer && (
                           <button
-                            className={`ca-chip${cad.facture ? ' done' : ''}`}
-                            onClick={() => toggleField(cad, 'facture')}
-                            disabled={toggling === `${cad.id}::facture`}
-                            title={cad.facture ? 'Marquer non facturé' : 'Marquer facturé'}>
-                            {cad.facture && <CheckIcon />} Facturé
+                            className={`ca-chip${pc.facture ? ' done' : ''}`}
+                            onClick={() => toggleField(pc, 'facture')}
+                            disabled={toggling === `${pc.id}::facture`}
+                            title={pc.facture ? 'Marquer non facturé' : 'Marquer facturé'}>
+                            {pc.facture && <CheckIcon />} Facturé
                           </button>
                         )}
                       </div>
 
                       <div className="ca-acts">
-                        <button className="ca-act-btn" onClick={() => { setEditCad(cad); setShowModal(true) }} title="Modifier">
+                        <button className="ca-act-btn" onClick={() => { setEditPc(pc); setShowModal(true) }} title="Modifier">
                           <IconPencil />
                         </button>
-                        <button className="ca-act-btn danger" onClick={() => deleteCad(cad)} title="Supprimer">
+                        <button className="ca-act-btn danger" onClick={() => deletePc(pc)} title="Supprimer">
                           <IconTrash />
                         </button>
                       </div>
                     </>
                   ) : (
                     <button className="ca-add-row-btn"
-                      onClick={() => { setDefaultBien(bien.id); setEditCad(undefined); setShowModal(true) }}>
+                      onClick={() => { setDefaultBien(bien.id); setEditPc(undefined); setShowModal(true) }}>
                       + Ajouter
                     </button>
                   )}
@@ -207,12 +207,12 @@ export function CadastresView({ societes, biens, profiles, activeOwner, activeSo
       ))}
 
       {showModal && (
-        <CadastreModal
+        <PrecompteModal
           biens={biens}
           defaultBienId={defaultBien}
           defaultAnnee={year}
-          editCadastre={editCad}
-          onClose={() => { setShowModal(false); setEditCad(undefined) }}
+          editPrecompte={editPc}
+          onClose={() => { setShowModal(false); setEditPc(undefined) }}
           onSaved={loadAll}
         />
       )}

@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Bien, Cadastre } from '../types'
+import type { Bien, Precompte } from '../types'
 
 interface Props {
-  biens:          Bien[]
-  defaultBienId:  string
-  defaultAnnee:   number
-  editCadastre?:  Cadastre
-  onClose:        () => void
-  onSaved:        () => void
+  biens:           Bien[]
+  defaultBienId:   string
+  defaultAnnee:    number
+  editPrecompte?:  Precompte
+  onClose:         () => void
+  onSaved:         () => void
 }
 
-export function CadastreModal({ biens, defaultBienId, defaultAnnee, editCadastre, onClose, onSaved }: Props) {
-  const e = editCadastre
+export function PrecompteModal({ biens, defaultBienId, defaultAnnee, editPrecompte, onClose, onSaved }: Props) {
+  const e = editPrecompte
   const [bienId,  setBienId]  = useState(e?.bien_id          ?? defaultBienId)
   const [annee,   setAnnee]   = useState(String(e?.annee     ?? defaultAnnee))
   const [montant, setMontant] = useState(e?.montant != null  ? String(e.montant) : '')
@@ -39,8 +39,8 @@ export function CadastreModal({ biens, defaultBienId, defaultAnnee, editCadastre
       notes:         notes.trim() || null,
     }
     const { error: err } = e
-      ? await supabase.from('cadastres').update(payload).eq('id', e.id)
-      : await supabase.from('cadastres').insert(payload)
+      ? await supabase.from('precomptes').update(payload).eq('id', e.id)
+      : await supabase.from('precomptes').insert(payload)
     setSaving(false)
     if (err) { setError(err.message); return }
     onSaved(); onClose()
