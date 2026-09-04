@@ -639,10 +639,11 @@ button { font-family: inherit; }
 .ly-bien-name { font-size: 12px; font-weight: 600; color: var(--tx2); flex: 1; }
 
 .ly-add-loc {
-  font-size: 12px; color: var(--uL); background: none; border: none;
-  cursor: pointer; padding: 2px 8px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; color: var(--uL); background: none;
+  border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px;
+  cursor: pointer; transition: all .15s;
 }
-.ly-add-loc:hover { background: var(--info-bg); }
+.ly-add-loc:hover { background: var(--info-bg); border-color: var(--uL); }
 
 .ly-empty {
   font-size: 12px; color: var(--tx3);
@@ -821,11 +822,11 @@ button { font-family: inherit; }
 .ca-act-btn.danger:hover { background: var(--danger-bg); border-color: #FCA5A5; color: var(--danger); }
 
 .ca-add-row-btn {
-  margin-left: auto; font-size: 12px; color: var(--tx3);
-  background: none; border: none; cursor: pointer;
-  padding: 3px 10px; border-radius: 6px;
+  margin-left: auto; font-size: 12px; font-weight: 600; color: var(--uL);
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  padding: 3px 10px; border-radius: 6px; transition: all .15s;
 }
-.ca-add-row-btn:hover { background: var(--info-bg); color: var(--uL); }
+.ca-add-row-btn:hover { background: var(--info-bg); border-color: var(--uL); }
 
 /* Radio dans les modales */
 .mf-check input[type="radio"] { width: 14px; height: 14px; accent-color: var(--uL); cursor: pointer; flex-shrink: 0; }
