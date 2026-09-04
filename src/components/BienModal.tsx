@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Bien, Societe } from '../types'
+import type { Bien, Societe, Batiment } from '../types'
 import { supabase } from '../lib/supabase'
 
 interface Props {
@@ -7,28 +7,31 @@ interface Props {
   onClose:     () => void
   onSaved:     () => void
   societes:    Societe[]
+  batiments:   Batiment[]
   defaultSoc?: string
   editBien?:   Bien
 }
 
-export function BienModal({ open, onClose, onSaved, societes, defaultSoc = '', editBien }: Props) {
+export function BienModal({ open, onClose, onSaved, societes, batiments, defaultSoc = '', editBien }: Props) {
   const isEdit = !!editBien
 
-  const [socId,  setSocId]  = useState('')
-  const [name,   setName]   = useState('')
-  const [lots,   setLots]   = useState('1')
-  const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState<string | null>(null)
+  const [socId,     setSocId]     = useState('')
+  const [batimentId, setBatimentId] = useState<string>('')
+  const [name,      setName]      = useState('')
+  const [lots,      setLots]      = useState('1')
+  const [saving,    setSaving]    = useState(false)
+  const [error,     setError]     = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!open) return
     if (isEdit && editBien) {
       setSocId(editBien.societe_id)
+      setBatimentId(editBien.batiment_id ?? '')
       setName(editBien.name)
       setLots(String(editBien.lots_count))
     } else {
-      setSocId(defaultSoc); setName(''); setLots('1')
+      setSocId(defaultSoc); setBatimentId(''); setName(''); setLots('1')
     }
     setError(null)
     setTimeout(() => nameRef.current?.focus(), 60)
@@ -41,15 +44,24 @@ export function BienModal({ open, onClose, onSaved, societes, defaultSoc = '', e
     return () => document.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
+  const socBatiments = batiments.filter(b => b.societe_id === socId)
+
+  // Reset batiment if société changes
+  function handleSocChange(id: string) {
+    setSocId(id)
+    setBatimentId('')
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim() || !socId) return
     setSaving(true); setError(null)
 
     const payload = {
-      societe_id: socId,
-      name:       name.trim(),
-      lots_count: parseInt(lots) || 1,
+      societe_id:  socId,
+      batiment_id: batimentId || null,
+      name:        name.trim(),
+      lots_count:  parseInt(lots) || 1,
     }
 
     const { error } = isEdit
@@ -75,11 +87,21 @@ export function BienModal({ open, onClose, onSaved, societes, defaultSoc = '', e
         <form className="modal-form" onSubmit={handleSubmit}>
           <div className="mf-group">
             <label className="mf-label">Société <span className="mf-req">*</span></label>
-            <select className="mf-select" value={socId} onChange={e => setSocId(e.target.value)} required>
+            <select className="mf-select" value={socId} onChange={e => handleSocChange(e.target.value)} required>
               <option value="">— Choisir —</option>
               {societes.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
+
+          {socId && (
+            <div className="mf-group">
+              <label className="mf-label">Bâtiment <span className="mf-opt">(optionnel)</span></label>
+              <select className="mf-select" value={batimentId} onChange={e => setBatimentId(e.target.value)}>
+                <option value="">— Aucun (bien standalone) —</option>
+                {socBatiments.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+              </select>
+            </div>
+          )}
 
           <div className="mf-row">
             <div className="mf-group" style={{ flex: 2 }}>
@@ -90,7 +112,7 @@ export function BienModal({ open, onClose, onSaved, societes, defaultSoc = '', e
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Ex : Rue de la Loi 42"
+                placeholder="Ex : Kot 1er étage"
                 required
               />
             </div>

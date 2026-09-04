@@ -47,10 +47,23 @@ alter table public.societes enable row level security;
 create policy "societes: full access" on public.societes to authenticated using (true) with check (true);
 
 
+-- ── Bâtiments (groupement optionnel de biens) ─────────────────
+create table public.batiments (
+  id         uuid primary key default gen_random_uuid(),
+  societe_id uuid references public.societes(id) on delete cascade not null,
+  name       text not null,
+  created_at timestamptz default now()
+);
+alter table public.batiments enable row level security;
+create policy "batiments: full access" on public.batiments to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.batiments to authenticated;
+
+
 -- ── Biens ─────────────────────────────────────────────────────
 create table public.biens (
   id          uuid primary key default gen_random_uuid(),
   societe_id  uuid references public.societes(id) on delete cascade not null,
+  batiment_id uuid references public.batiments(id) on delete set null,
   name        text not null,
   lots_count  integer not null default 1,
   created_at  timestamptz default now()
@@ -223,10 +236,14 @@ create policy "montants_impayes: full access" on public.montants_impayes to auth
 grant select, insert, update, delete on public.montants_impayes to authenticated;
 
 
--- ── Précomptes immobiliers par bien ───────────────────────────
+-- ── Précomptes immobiliers ─────────────────────────────────────
+-- bien_id     : bien standalone (pas de bâtiment)
+-- batiment_id : bâtiment regroupant plusieurs biens
+-- Exactement un des deux doit être renseigné
 create table public.precomptes (
   id            uuid primary key default gen_random_uuid(),
-  bien_id       uuid references public.biens(id) on delete cascade not null,
+  bien_id       uuid references public.biens(id) on delete cascade,
+  batiment_id   uuid references public.batiments(id) on delete cascade,
   annee         int not null check (annee between 2000 and 2100),
   montant       numeric(10,2),
   date_paiement date,
@@ -236,8 +253,10 @@ create table public.precomptes (
   notes         text,
   active        boolean not null default true,
   created_at    timestamptz default now(),
-  unique(bien_id, annee)
+  constraint precomptes_bien_or_bat check ((bien_id is null) != (batiment_id is null))
 );
+create unique index precomptes_bien_annee_uidx  on public.precomptes(bien_id, annee)    where bien_id is not null;
+create unique index precomptes_bat_annee_uidx   on public.precomptes(batiment_id, annee) where batiment_id is not null;
 alter table public.precomptes enable row level security;
 create policy "precomptes: full access" on public.precomptes to authenticated using (true) with check (true);
 grant select, insert, update, delete on public.precomptes to authenticated;
@@ -252,3 +271,39 @@ grant select, insert, update, delete on public.precomptes to authenticated;
 -- update public.profiles set name='Loucas', initials='L', color_css='var(--uL)' where id='UUID-LOUCAS';
 -- update public.profiles set name='Père',   initials='P', color_css='var(--uP)' where id='UUID-PERE';
 -- update public.profiles set name='Frère',  initials='F', color_css='var(--uF)' where id='UUID-FRERE';
+
+
+-- ══════════════════════════════════════════════════════════════
+--  Migration : bâtiments (à exécuter sur un DB existant)
+-- ══════════════════════════════════════════════════════════════
+
+-- 1. Créer la table batiments
+create table if not exists public.batiments (
+  id         uuid primary key default gen_random_uuid(),
+  societe_id uuid references public.societes(id) on delete cascade not null,
+  name       text not null,
+  created_at timestamptz default now()
+);
+alter table public.batiments enable row level security;
+create policy if not exists "batiments: full access" on public.batiments to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.batiments to authenticated;
+
+-- 2. Ajouter batiment_id sur biens
+alter table public.biens
+  add column if not exists batiment_id uuid references public.batiments(id) on delete set null;
+
+-- 3. Migrer precomptes : ajouter batiment_id, rendre bien_id nullable
+alter table public.precomptes
+  add column if not exists batiment_id uuid references public.batiments(id) on delete cascade,
+  alter column bien_id drop not null;
+
+-- 4. Supprimer l'ancienne contrainte unique et ajouter les nouvelles partielles
+alter table public.precomptes
+  drop constraint if exists precomptes_bien_id_annee_key;
+alter table public.precomptes
+  add constraint if not exists precomptes_bien_or_bat
+  check ((bien_id is null) != (batiment_id is null));
+create unique index if not exists precomptes_bien_annee_uidx
+  on public.precomptes(bien_id, annee) where bien_id is not null;
+create unique index if not exists precomptes_bat_annee_uidx
+  on public.precomptes(batiment_id, annee) where batiment_id is not null;

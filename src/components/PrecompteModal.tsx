@@ -1,35 +1,48 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Bien, Precompte } from '../types'
+import type { Bien, Batiment, Precompte } from '../types'
 
 interface Props {
-  biens:           Bien[]
-  defaultBienId:   string
-  defaultAnnee:    number
-  editPrecompte?:  Precompte
-  onClose:         () => void
-  onSaved:         () => void
+  biens:              Bien[]
+  batiments:          Batiment[]
+  defaultBienId:      string
+  defaultBatimentId:  string
+  defaultAnnee:       number
+  editPrecompte?:     Precompte
+  onClose:            () => void
+  onSaved:            () => void
 }
 
-export function PrecompteModal({ biens, defaultBienId, defaultAnnee, editPrecompte, onClose, onSaved }: Props) {
+export function PrecompteModal({
+  biens, batiments, defaultBienId, defaultBatimentId, defaultAnnee, editPrecompte, onClose, onSaved,
+}: Props) {
   const e = editPrecompte
-  const [bienId,  setBienId]  = useState(e?.bien_id          ?? defaultBienId)
-  const [annee,   setAnnee]   = useState(String(e?.annee     ?? defaultAnnee))
-  const [montant, setMontant] = useState(e?.montant != null  ? String(e.montant) : '')
-  const [datePay, setDatePay] = useState(e?.date_paiement    ?? '')
-  const [aRefac,  setARefac]  = useState(e?.a_refacturer     ?? false)
-  const [paye,    setPaye]    = useState(e?.paye             ?? false)
-  const [facture, setFacture] = useState(e?.facture          ?? false)
-  const [notes,   setNotes]   = useState(e?.notes            ?? '')
-  const [saving,  setSaving]  = useState(false)
-  const [error,   setError]   = useState('')
+
+  // Mode : 'bat' si batiment_id est défini, 'bien' sinon
+  const initMode = e ? (e.batiment_id ? 'bat' : 'bien') : (defaultBatimentId ? 'bat' : 'bien')
+  const [mode] = useState<'bat' | 'bien'>(initMode)
+
+  const [batimentId, setBatimentId] = useState(e?.batiment_id ?? defaultBatimentId)
+  const [bienId,     setBienId]     = useState(e?.bien_id     ?? defaultBienId)
+  const [annee,      setAnnee]      = useState(String(e?.annee ?? defaultAnnee))
+  const [montant,    setMontant]    = useState(e?.montant != null ? String(e.montant) : '')
+  const [datePay,    setDatePay]    = useState(e?.date_paiement ?? '')
+  const [aRefac,     setARefac]     = useState(e?.a_refacturer ?? false)
+  const [paye,       setPaye]       = useState(e?.paye ?? false)
+  const [facture,    setFacture]    = useState(e?.facture ?? false)
+  const [notes,      setNotes]      = useState(e?.notes ?? '')
+  const [saving,     setSaving]     = useState(false)
+  const [error,      setError]      = useState('')
 
   async function save() {
-    if (!bienId) { setError('Bien requis.');   return }
-    if (!annee)  { setError('Année requise.'); return }
+    if (mode === 'bat' && !batimentId) { setError('Bâtiment requis.'); return }
+    if (mode === 'bien' && !bienId)    { setError('Bien requis.');      return }
+    if (!annee)                        { setError('Année requise.');    return }
     setSaving(true); setError('')
+
     const payload = {
-      bien_id:       bienId,
+      bien_id:       mode === 'bien' ? bienId     : null,
+      batiment_id:   mode === 'bat'  ? batimentId : null,
       annee:         parseInt(annee),
       montant:       montant ? parseFloat(montant) : null,
       date_paiement: datePay || null,
@@ -38,6 +51,7 @@ export function PrecompteModal({ biens, defaultBienId, defaultAnnee, editPrecomp
       facture:       aRefac ? facture : false,
       notes:         notes.trim() || null,
     }
+
     const { error: err } = e
       ? await supabase.from('precomptes').update(payload).eq('id', e.id)
       : await supabase.from('precomptes').insert(payload)
@@ -57,11 +71,23 @@ export function PrecompteModal({ biens, defaultBienId, defaultAnnee, editPrecomp
 
           <div className="mf-row">
             <div className="mf-group">
-              <label className="mf-label">Bien <span className="mf-req">*</span></label>
-              <select className="mf-select" value={bienId} onChange={ev => setBienId(ev.target.value)} disabled={!!e}>
-                <option value="">— Choisir —</option>
-                {biens.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+              {mode === 'bat' ? (
+                <>
+                  <label className="mf-label">Bâtiment <span className="mf-req">*</span></label>
+                  <select className="mf-select" value={batimentId ?? ''} onChange={ev => setBatimentId(ev.target.value)} disabled={!!e}>
+                    <option value="">— Choisir —</option>
+                    {batiments.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <label className="mf-label">Bien <span className="mf-req">*</span></label>
+                  <select className="mf-select" value={bienId ?? ''} onChange={ev => setBienId(ev.target.value)} disabled={!!e}>
+                    <option value="">— Choisir —</option>
+                    {biens.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </>
+              )}
             </div>
             <div className="mf-group mf-group-sm">
               <label className="mf-label">Année</label>

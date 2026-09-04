@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Societe, Bien, Profile, Precompte } from '../types'
+import type { Societe, Bien, Batiment, Profile, Precompte } from '../types'
 import { PrecompteModal } from './PrecompteModal'
+import { BatimentModal } from './BatimentModal'
 
 function fmtAmt(n: number | null) {
   if (n == null) return '—'
@@ -27,7 +28,6 @@ function IconTrash() {
     </svg>
   )
 }
-
 function CheckIcon() {
   return (
     <svg viewBox="0 0 10 8" width="9" height="7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -39,20 +39,25 @@ function CheckIcon() {
 interface Props {
   societes:    Societe[]
   biens:       Bien[]
+  batiments:   Batiment[]
   profiles:    Profile[]
   activeOwner: string
   activeSoc:   string
   refreshKey:  number
 }
 
-export function PrecomptesView({ societes, biens, profiles, activeOwner, activeSoc, refreshKey }: Props) {
-  const [precomptes,  setPrecomptes]  = useState<Precompte[]>([])
-  const [year,        setYear]        = useState(new Date().getFullYear())
-  const [showModal,   setShowModal]   = useState(false)
-  const [editPc,      setEditPc]      = useState<Precompte | undefined>()
-  const [defaultBien, setDefaultBien] = useState('')
-  const [collapsed,   setCollapsed]   = useState<Set<string>>(new Set())
-  const [toggling,    setToggling]    = useState<string | null>(null)
+export function PrecomptesView({ societes, biens, batiments, profiles, activeOwner, activeSoc, refreshKey }: Props) {
+  const [precomptes,       setPrecomptes]       = useState<Precompte[]>([])
+  const [year,             setYear]             = useState(new Date().getFullYear())
+  const [showModal,        setShowModal]        = useState(false)
+  const [editPc,           setEditPc]           = useState<Precompte | undefined>()
+  const [defaultBien,      setDefaultBien]      = useState('')
+  const [defaultBatiment,  setDefaultBatiment]  = useState('')
+  const [showBatModal,     setShowBatModal]     = useState(false)
+  const [editBat,          setEditBat]          = useState<Batiment | undefined>()
+  const [batSocId,         setBatSocId]         = useState('')
+  const [collapsed,        setCollapsed]        = useState<Set<string>>(new Set())
+  const [toggling,         setToggling]         = useState<string | null>(null)
 
   function toggleSoc(id: string) {
     setCollapsed(prev => {
@@ -85,6 +90,11 @@ export function PrecomptesView({ societes, biens, profiles, activeOwner, activeS
     setPrecomptes(prev => prev.filter(c => c.id !== pc.id))
   }
 
+  async function deleteBat(bat: Batiment) {
+    if (!window.confirm(`Supprimer le bâtiment « ${bat.name} » ? Les biens seront dissociés mais conservés.`)) return
+    await supabase.from('batiments').delete().eq('id', bat.id)
+  }
+
   const visibleSocs = societes.filter(s => {
     if (activeSoc   !== 'all' && s.id       !== activeSoc)   return false
     if (activeOwner !== 'all' && s.owner_id !== activeOwner) return false
@@ -100,9 +110,49 @@ export function PrecomptesView({ societes, biens, profiles, activeOwner, activeS
   const allSocIds    = groups.flatMap(g => g.socs.map(s => s.id))
   const allCollapsed = allSocIds.length > 0 && allSocIds.every(id => collapsed.has(id))
 
+  function renderPrecompteData(pc: Precompte) {
+    return (
+      <>
+        <span className="ca-amount">{fmtAmt(pc.montant)}</span>
+        <span className="ca-date">{fmtDate(pc.date_paiement)}</span>
+        <span className={`ca-charge ${pc.a_refacturer ? 'refac' : 'notre'}`}>
+          {pc.a_refacturer ? 'À refacturer' : 'Notre charge'}
+        </span>
+        <div className="ca-chips">
+          <button
+            className={`ca-chip${pc.paye ? ' done' : ''}`}
+            onClick={() => toggleField(pc, 'paye')}
+            disabled={toggling === `${pc.id}::paye`}
+            title={pc.paye ? 'Marquer non payé' : 'Marquer payé'}>
+            {pc.paye && <CheckIcon />} Payé
+          </button>
+          {pc.a_refacturer && (
+            <button
+              className={`ca-chip${pc.facture ? ' done' : ''}`}
+              onClick={() => toggleField(pc, 'facture')}
+              disabled={toggling === `${pc.id}::facture`}
+              title={pc.facture ? 'Marquer non facturé' : 'Marquer facturé'}>
+              {pc.facture && <CheckIcon />} Facturé
+            </button>
+          )}
+        </div>
+        <div className="ca-acts">
+          <button className="ca-act-btn" onClick={() => { setEditPc(pc); setShowModal(true) }} title="Modifier">
+            <IconPencil />
+          </button>
+          <button className="ca-act-btn danger" onClick={() => deletePc(pc)} title="Supprimer">
+            <IconTrash />
+          </button>
+        </div>
+      </>
+    )
+  }
+
   function renderSoc(soc: Societe) {
-    const socBiens = biens.filter(b => b.societe_id === soc.id)
-    if (socBiens.length === 0) return null
+    const socBatiments     = batiments.filter(bat => bat.societe_id === soc.id)
+    const socStandalone    = biens.filter(b => b.societe_id === soc.id && !b.batiment_id)
+    if (socBatiments.length === 0 && socStandalone.length === 0) return null
+
     const isCollapsed = collapsed.has(soc.id)
     return (
       <div key={soc.id} className="ca-soc">
@@ -116,58 +166,58 @@ export function PrecomptesView({ societes, biens, profiles, activeOwner, activeS
               <path d="M1 1l4 4 4-4" />
             </svg>
           </button>
+          <button className="ca-add-bat-btn" onClick={() => { setBatSocId(soc.id); setEditBat(undefined); setShowBatModal(true) }}>
+            + Bâtiment
+          </button>
         </div>
 
         {!isCollapsed && (
           <div className="ca-rows">
-            {socBiens.map(bien => {
+            {/* Bâtiments groupés */}
+            {socBatiments.map(bat => {
+              const batBiens = biens.filter(b => b.batiment_id === bat.id)
+              const pc = precomptes.find(c => c.batiment_id === bat.id && c.annee === year)
+              return (
+                <div key={bat.id} className="ca-row ca-row--bat">
+                  <div className="ca-row-label">
+                    <div className="ca-bat-header">
+                      <span className="ca-bat-name">{bat.name}</span>
+                      <div className="ca-bat-acts">
+                        <button className="ca-act-btn" title="Renommer"
+                          onClick={() => { setEditBat(bat); setBatSocId(soc.id); setShowBatModal(true) }}>
+                          <IconPencil />
+                        </button>
+                        <button className="ca-act-btn danger" title="Supprimer le bâtiment"
+                          onClick={() => deleteBat(bat)}>
+                          <IconTrash />
+                        </button>
+                      </div>
+                    </div>
+                    {batBiens.length > 0 && (
+                      <div className="ca-bat-lots">
+                        {batBiens.map(b => b.name).join(' · ')}
+                      </div>
+                    )}
+                  </div>
+                  {pc ? renderPrecompteData(pc) : (
+                    <button className="ca-add-row-btn" onClick={() => {
+                      setDefaultBatiment(bat.id); setDefaultBien(''); setEditPc(undefined); setShowModal(true)
+                    }}>+ Ajouter</button>
+                  )}
+                </div>
+              )
+            })}
+
+            {/* Biens standalone (sans bâtiment) */}
+            {socStandalone.map(bien => {
               const pc = precomptes.find(c => c.bien_id === bien.id && c.annee === year)
               return (
                 <div key={bien.id} className="ca-row">
                   <span className="ca-bien-name">{bien.name}</span>
-
-                  {pc ? (
-                    <>
-                      <span className="ca-amount">{fmtAmt(pc.montant)}</span>
-                      <span className="ca-date">{fmtDate(pc.date_paiement)}</span>
-
-                      <span className={`ca-charge ${pc.a_refacturer ? 'refac' : 'notre'}`}>
-                        {pc.a_refacturer ? 'À refacturer' : 'Notre charge'}
-                      </span>
-
-                      <div className="ca-chips">
-                        <button
-                          className={`ca-chip${pc.paye ? ' done' : ''}`}
-                          onClick={() => toggleField(pc, 'paye')}
-                          disabled={toggling === `${pc.id}::paye`}
-                          title={pc.paye ? 'Marquer non payé' : 'Marquer payé'}>
-                          {pc.paye && <CheckIcon />} Payé
-                        </button>
-                        {pc.a_refacturer && (
-                          <button
-                            className={`ca-chip${pc.facture ? ' done' : ''}`}
-                            onClick={() => toggleField(pc, 'facture')}
-                            disabled={toggling === `${pc.id}::facture`}
-                            title={pc.facture ? 'Marquer non facturé' : 'Marquer facturé'}>
-                            {pc.facture && <CheckIcon />} Facturé
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="ca-acts">
-                        <button className="ca-act-btn" onClick={() => { setEditPc(pc); setShowModal(true) }} title="Modifier">
-                          <IconPencil />
-                        </button>
-                        <button className="ca-act-btn danger" onClick={() => deletePc(pc)} title="Supprimer">
-                          <IconTrash />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <button className="ca-add-row-btn"
-                      onClick={() => { setDefaultBien(bien.id); setEditPc(undefined); setShowModal(true) }}>
-                      + Ajouter
-                    </button>
+                  {pc ? renderPrecompteData(pc) : (
+                    <button className="ca-add-row-btn" onClick={() => {
+                      setDefaultBien(bien.id); setDefaultBatiment(''); setEditPc(undefined); setShowModal(true)
+                    }}>+ Ajouter</button>
                   )}
                 </div>
               )
@@ -209,11 +259,22 @@ export function PrecomptesView({ societes, biens, profiles, activeOwner, activeS
       {showModal && (
         <PrecompteModal
           biens={biens}
+          batiments={batiments}
           defaultBienId={defaultBien}
+          defaultBatimentId={defaultBatiment}
           defaultAnnee={year}
           editPrecompte={editPc}
           onClose={() => { setShowModal(false); setEditPc(undefined) }}
           onSaved={loadAll}
+        />
+      )}
+
+      {showBatModal && (
+        <BatimentModal
+          societeId={batSocId}
+          editBatiment={editBat}
+          onClose={() => { setShowBatModal(false); setEditBat(undefined) }}
+          onSaved={() => {}}
         />
       )}
     </div>

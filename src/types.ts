@@ -87,9 +87,17 @@ export interface ComptaEntry {
   notes:       string | null
   created_at:  string
 }
+export interface Batiment {
+  id:         string
+  societe_id: string
+  name:       string
+  created_at: string
+}
+
 export interface Precompte {
   id:            string
-  bien_id:       string
+  bien_id:       string | null
+  batiment_id:   string | null
   annee:         number
   montant:       number | null
   date_paiement: string | null
@@ -123,6 +131,7 @@ export interface Societe {
 export interface Bien {
   id:          string
   societe_id:  string
+  batiment_id: string | null
   name:        string
   lots_count:  number
   created_at:  string

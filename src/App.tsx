@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
-import type { Profile, Societe, Bien, Tache } from './types'
+import type { Profile, Societe, Bien, Batiment, Tache } from './types'
 import { LoginScreen } from './components/LoginScreen'
 import { Sidebar } from './components/Sidebar'
 import { TaskList } from './components/TaskList'
@@ -18,10 +18,11 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [authReady, setAuthReady] = useState(false)
 
-  const [profiles, setProfiles] = useState<Profile[]>([])
-  const [societes, setSocietes] = useState<Societe[]>([])
-  const [biens, setBiens] = useState<Bien[]>([])
-  const [taches, setTaches] = useState<Tache[]>([])
+  const [profiles,  setProfiles]  = useState<Profile[]>([])
+  const [societes,  setSocietes]  = useState<Societe[]>([])
+  const [biens,     setBiens]     = useState<Bien[]>([])
+  const [batiments, setBatiments] = useState<Batiment[]>([])
+  const [taches,    setTaches]    = useState<Tache[]>([])
 
   const [view, setView] = useState<'tasks' | 'compta' | 'assurances' | 'loyers' | 'cadastres'>('tasks')
   const [comptaRefreshKey,     setComptaRefreshKey]     = useState(0)
@@ -56,18 +57,20 @@ export default function App() {
 
   // Data
   const loadData = useCallback(async () => {
-    const [p, s, b, t] = await Promise.all([
+    const [p, s, b, bt, t] = await Promise.all([
       supabase.from('profiles').select('*').order('name'),
       supabase.from('societes').select('*, owner:profiles(*)').order('name'),
       supabase.from('biens').select('*').order('name'),
+      supabase.from('batiments').select('*').order('name'),
       supabase.from('taches')
         .select('*, societe:societes(*, owner:profiles(*)), bien:biens(*), assignee:profiles!assigned_to(*)')
         .order('due_date', { ascending: true, nullsFirst: false }),
     ])
-    if (p.data) setProfiles(p.data as Profile[])
-    if (s.data) setSocietes(s.data as unknown as Societe[])
-    if (b.data) setBiens(b.data as Bien[])
-    if (t.data) setTaches(t.data as unknown as Tache[])
+    if (p.data)  setProfiles(p.data as Profile[])
+    if (s.data)  setSocietes(s.data as unknown as Societe[])
+    if (b.data)  setBiens(b.data as Bien[])
+    if (bt.data) setBatiments(bt.data as Batiment[])
+    if (t.data)  setTaches(t.data as unknown as Tache[])
   }, [])
 
   // Auto-select logged-in user's filter on first load
@@ -92,6 +95,7 @@ export default function App() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'locataires' },      () => setLoyersRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_paiements' }, () => setLoyersRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_impayes' },   () => setLoyersRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'batiments' },       loadData)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'precomptes' },      () => setPrecomptesRefreshKey(k => k + 1))
       .subscribe()
 
@@ -245,6 +249,7 @@ export default function App() {
           <PrecomptesView
             societes={societes}
             biens={biens}
+            batiments={batiments}
             profiles={profiles}
             activeOwner={activeOwner}
             activeSoc={activeSoc}
@@ -280,6 +285,7 @@ export default function App() {
         onClose={() => { setShowBienModal(false); setEditBien(undefined) }}
         onSaved={loadData}
         societes={societes}
+        batiments={batiments}
         defaultSoc={bienSocDef}
         editBien={editBien}
       />

@@ -604,8 +604,9 @@ button { font-family: inherit; }
 .as-act-btn:hover        { background: var(--sunken); border-color: var(--border); color: var(--tx2); }
 .as-act-btn.danger:hover { background: var(--danger-bg); border-color: #FCA5A5; color: var(--danger); }
 
-/* Modal large */
-.modal-card-lg { max-width: 680px; }
+/* Modal large / small */
+.modal-card-lg  { max-width: 680px; }
+.modal-card--sm { max-width: 360px; }
 
 /* Checkboxes dans les modales */
 .mf-checks { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -782,9 +783,12 @@ button { font-family: inherit; }
   box-shadow: var(--sh-s);
 }
 
-.ca-soc-hd { padding: 14px 18px; border-bottom: 1px solid var(--border); }
-.ca-soc-toggle {
+.ca-soc-hd {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 10px;
+}
+.ca-soc-toggle {
+  display: flex; align-items: center; gap: 10px; flex: 1;
   width: 100%; background: none; border: none; cursor: pointer; text-align: left; padding: 0;
 }
 .ca-soc-toggle:hover .ca-soc-name { color: var(--uL); }
@@ -834,6 +838,24 @@ button { font-family: inherit; }
 }
 .ca-act-btn:hover        { background: var(--sunken); border-color: var(--border); color: var(--tx2); }
 .ca-act-btn.danger:hover { background: var(--danger-bg); border-color: #FCA5A5; color: var(--danger); }
+
+.ca-add-bat-btn {
+  font-size: 12px; font-weight: 600; color: var(--uL); flex-shrink: 0;
+  border: 1px solid var(--border); background: none; border-radius: 6px;
+  padding: 3px 10px; cursor: pointer; transition: all .15s; white-space: nowrap;
+}
+.ca-add-bat-btn:hover { background: var(--info-bg); border-color: var(--uL); }
+
+/* Bâtiment row */
+.ca-row--bat { align-items: flex-start; padding-top: 10px; padding-bottom: 10px; }
+.ca-row-label { display: flex; flex-direction: column; gap: 3px; flex: 0 0 180px; min-width: 0; }
+.ca-bat-header { display: flex; align-items: center; gap: 6px; }
+.ca-bat-name {
+  font-size: 13px; font-weight: 700; color: var(--tx1); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; flex: 1;
+}
+.ca-bat-lots { font-size: 11px; color: var(--tx3); white-space: normal; line-height: 1.4; }
+.ca-bat-acts { display: flex; gap: 2px; flex-shrink: 0; }
 
 .ca-add-row-btn {
   margin-left: auto; font-size: 12px; font-weight: 600; color: var(--uL);
