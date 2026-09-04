@@ -25,7 +25,7 @@ export interface LoyerPaiement {
   created_at:   string
 }
 
-export interface LoyerImpaye {
+export interface MontantImpaye {
   id:           string
   locataire_id: string
   label:        string

@@ -209,8 +209,8 @@ alter table public.loyer_paiements enable row level security;
 create policy "loyer_paiements: full access" on public.loyer_paiements to authenticated using (true) with check (true);
 grant select, insert, update, delete on public.loyer_paiements to authenticated;
 
--- ── Loyers — soldes impayés ────────────────────────────────────
-create table public.loyer_impayes (
+-- ── Loyers — montants impayés (caution, précompte, divers…) ───
+create table public.montants_impayes (
   id           uuid primary key default gen_random_uuid(),
   locataire_id uuid references public.locataires(id) on delete cascade not null,
   label        text not null,
@@ -218,9 +218,9 @@ create table public.loyer_impayes (
   rembourse    boolean not null default false,
   created_at   timestamptz default now()
 );
-alter table public.loyer_impayes enable row level security;
-create policy "loyer_impayes: full access" on public.loyer_impayes to authenticated using (true) with check (true);
-grant select, insert, update, delete on public.loyer_impayes to authenticated;
+alter table public.montants_impayes enable row level security;
+create policy "montants_impayes: full access" on public.montants_impayes to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.montants_impayes to authenticated;
 
 
 -- ══════════════════════════════════════════════════════════════

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Societe, Bien, Profile, Locataire, LoyerPaiement, LoyerImpaye } from '../types'
+import type { Societe, Bien, Profile, Locataire, LoyerPaiement, MontantImpaye } from '../types'
 import { LocataireModal } from './LocataireModal'
 
 const FR_MONTHS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
@@ -39,7 +39,7 @@ interface Props {
 export function LoyersView({ societes, biens, profiles, activeOwner, activeSoc, refreshKey }: Props) {
   const [locataires,    setLocataires]    = useState<Locataire[]>([])
   const [paiements,     setPaiements]     = useState<LoyerPaiement[]>([])
-  const [impayes,       setImpayes]       = useState<LoyerImpaye[]>([])
+  const [impayes,       setImpayes]       = useState<MontantImpaye[]>([])
   const [year,          setYear]          = useState(new Date().getFullYear())
   const [showModal,     setShowModal]     = useState(false)
   const [editLoc,       setEditLoc]       = useState<Locataire | undefined>()
@@ -65,11 +65,11 @@ export function LoyersView({ societes, biens, profiles, activeOwner, activeSoc, 
     const [l, p, i] = await Promise.all([
       supabase.from('locataires').select('*').eq('active', true).order('created_at'),
       supabase.from('loyer_paiements').select('*'),
-      supabase.from('loyer_impayes').select('*').order('created_at'),
+      supabase.from('montants_impayes').select('*').order('created_at'),
     ])
     if (l.data) setLocataires(l.data as Locataire[])
     if (p.data) setPaiements(p.data as LoyerPaiement[])
-    if (i.data) setImpayes(i.data as LoyerImpaye[])
+    if (i.data) setImpayes(i.data as MontantImpaye[])
   }
 
   async function togglePaiement(locId: string, periodKey: string) {
@@ -100,25 +100,25 @@ export function LoyersView({ societes, biens, profiles, activeOwner, activeSoc, 
     const form = impayeForms[locId]
     if (!form?.label.trim() || !form?.montant) return
     const { data, error } = await supabase
-      .from('loyer_impayes')
+      .from('montants_impayes')
       .insert({ locataire_id: locId, label: form.label.trim(), montant: parseFloat(form.montant) })
       .select('*').single()
     if (!error && data) {
-      setImpayes(prev => [...prev, data as LoyerImpaye])
+      setImpayes(prev => [...prev, data as MontantImpaye])
       setImpayeForms(prev => ({ ...prev, [locId]: { label: '', montant: '' } }))
     }
   }
 
-  async function toggleRembourse(imp: LoyerImpaye) {
+  async function toggleRembourse(imp: MontantImpaye) {
     const { error } = await supabase
-      .from('loyer_impayes').update({ rembourse: !imp.rembourse }).eq('id', imp.id)
+      .from('montants_impayes').update({ rembourse: !imp.rembourse }).eq('id', imp.id)
     if (!error) {
       setImpayes(prev => prev.map(i => i.id === imp.id ? { ...i, rembourse: !imp.rembourse } : i))
     }
   }
 
-  async function deleteImpaye(imp: LoyerImpaye) {
-    await supabase.from('loyer_impayes').delete().eq('id', imp.id)
+  async function deleteImpaye(imp: MontantImpaye) {
+    await supabase.from('montants_impayes').delete().eq('id', imp.id)
     setImpayes(prev => prev.filter(i => i.id !== imp.id))
   }
 
@@ -225,7 +225,7 @@ export function LoyersView({ societes, biens, profiles, activeOwner, activeSoc, 
           {/* Impayés */}
           <div className="ly-impayes">
             <div className="ly-impaye-hd">
-              <span className="ly-impaye-title">Soldes impayés</span>
+              <span className="ly-impaye-title">Montants impayés</span>
             </div>
 
             {locImpayes.length > 0 && (
