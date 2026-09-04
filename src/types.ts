@@ -1,5 +1,39 @@
 export type Category     = 'loyer' | 'fiscal' | 'tech' | 'admin'
 
+export interface Locataire {
+  id:                string
+  bien_id:           string
+  nom:               string
+  loyer_base:        number | null
+  loyer_indexe:      number | null
+  charges_communes:  number | null
+  charges_privees:   number | null
+  loyer_total_tvac:  number | null
+  bail_signe:        boolean
+  bail_enregistre:   boolean
+  date_debut:        string | null
+  date_fin:          string | null
+  notes:             string | null
+  active:            boolean
+  created_at:        string
+}
+
+export interface LoyerPaiement {
+  id:           string
+  locataire_id: string
+  period_key:   string
+  created_at:   string
+}
+
+export interface LoyerImpaye {
+  id:           string
+  locataire_id: string
+  label:        string
+  montant:      number
+  rembourse:    boolean
+  created_at:   string
+}
+
 export type AssuranceType     = 'incendie' | 'protection_juridique' | 'omnium' | 'loyers_impayes' | 'rc_proprietaire' | 'rc_locataire' | 'autre'
 export type AssuranceFrequence = 'mensuel' | 'trimestriel' | 'annuel'
 export type AssuranceStatut   = 'actif' | 'resilie' | 'en_renouvellement'

@@ -172,6 +172,57 @@ create policy "assurances: full access" on public.assurances to authenticated us
 grant select, insert, update, delete on public.assurances to authenticated;
 
 
+-- ── Loyers — locataires ───────────────────────────────────────
+create table public.locataires (
+  id                uuid primary key default gen_random_uuid(),
+  bien_id           uuid references public.biens(id) on delete cascade not null,
+  nom               text not null,
+  loyer_base        numeric(10,2),
+  loyer_indexe      numeric(10,2),
+  charges_communes  numeric(10,2),
+  charges_privees   numeric(10,2),
+  loyer_total_tvac  numeric(10,2),
+  bail_signe        boolean not null default false,
+  bail_enregistre   boolean not null default false,
+  date_debut        date,
+  date_fin          date,
+  notes             text,
+  active            boolean not null default true,
+  created_at        timestamptz default now()
+);
+-- Un seul locataire actif par bien
+create unique index locataires_bien_active_uidx
+  on public.locataires (bien_id) where (active = true);
+alter table public.locataires enable row level security;
+create policy "locataires: full access" on public.locataires to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.locataires to authenticated;
+
+-- ── Loyers — paiements mensuels ───────────────────────────────
+create table public.loyer_paiements (
+  id           uuid primary key default gen_random_uuid(),
+  locataire_id uuid references public.locataires(id) on delete cascade not null,
+  period_key   text not null,  -- "2025-01", "2025-02", …
+  created_at   timestamptz default now(),
+  unique(locataire_id, period_key)
+);
+alter table public.loyer_paiements enable row level security;
+create policy "loyer_paiements: full access" on public.loyer_paiements to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.loyer_paiements to authenticated;
+
+-- ── Loyers — soldes impayés ────────────────────────────────────
+create table public.loyer_impayes (
+  id           uuid primary key default gen_random_uuid(),
+  locataire_id uuid references public.locataires(id) on delete cascade not null,
+  label        text not null,
+  montant      numeric(10,2) not null,
+  rembourse    boolean not null default false,
+  created_at   timestamptz default now()
+);
+alter table public.loyer_impayes enable row level security;
+create policy "loyer_impayes: full access" on public.loyer_impayes to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.loyer_impayes to authenticated;
+
+
 -- ══════════════════════════════════════════════════════════════
 --  Données de départ — à adapter avec les vrais UUIDs des comptes
 --  Créer d'abord les 3 comptes via Supabase Dashboard → Authentication

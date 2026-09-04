@@ -11,6 +11,7 @@ import { BienModal } from './components/BienModal'
 import { QuickList } from './components/QuickList'
 import { ComptaView } from './components/ComptaView'
 import { AssurancesView } from './components/AssurancesView'
+import { LoyersView } from './components/LoyersView'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
@@ -21,9 +22,10 @@ export default function App() {
   const [biens, setBiens] = useState<Bien[]>([])
   const [taches, setTaches] = useState<Tache[]>([])
 
-  const [view, setView] = useState<'tasks' | 'compta' | 'assurances'>('tasks')
+  const [view, setView] = useState<'tasks' | 'compta' | 'assurances' | 'loyers'>('tasks')
   const [comptaRefreshKey,     setComptaRefreshKey]     = useState(0)
   const [assurancesRefreshKey, setAssurancesRefreshKey] = useState(0)
+  const [loyersRefreshKey,     setLoyersRefreshKey]     = useState(0)
 
   const [activeOwner, setActiveOwner]   = useState('all')
   const [activeSoc, setActiveSoc]       = useState('all')
@@ -85,6 +87,9 @@ export default function App() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compta_templates' }, () => setComptaRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'compta_entries' },   () => setComptaRefreshKey(k => k + 1))
       .on('postgres_changes', { event: '*', schema: 'public', table: 'assurances' },       () => setAssurancesRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'locataires' },      () => setLoyersRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_paiements' }, () => setLoyersRefreshKey(k => k + 1))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'loyer_impayes' },   () => setLoyersRefreshKey(k => k + 1))
       .subscribe()
 
     return () => { supabase.removeChannel(ch) }
@@ -145,6 +150,7 @@ export default function App() {
           <button className={`main-nav-tab${view === 'tasks'      ? ' active' : ''}`} onClick={() => setView('tasks')}>Tâches</button>
           <button className={`main-nav-tab${view === 'compta'     ? ' active' : ''}`} onClick={() => setView('compta')}>Comptabilité</button>
           <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
+          <button className={`main-nav-tab${view === 'loyers'     ? ' active' : ''}`} onClick={() => setView('loyers')}>Loyers</button>
         </div>
 
         <div className="tab-panel" hidden={view !== 'tasks'}>
@@ -201,6 +207,25 @@ export default function App() {
             </div>
           </div>
           <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} activeSoc={activeSoc} refreshKey={comptaRefreshKey} />
+        </div>
+
+        <div className="tab-panel" hidden={view !== 'loyers'}>
+          <div className="mhdr">
+            <div className="hdr-row">
+              <div>
+                <h1 className="page-title">Loyers</h1>
+                <div className="hdr-meta">Suivi des loyers et locataires par bien</div>
+              </div>
+            </div>
+          </div>
+          <LoyersView
+            societes={societes}
+            biens={biens}
+            profiles={profiles}
+            activeOwner={activeOwner}
+            activeSoc={activeSoc}
+            refreshKey={loyersRefreshKey}
+          />
         </div>
       </main>
 
