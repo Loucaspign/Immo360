@@ -67,6 +67,15 @@ export function AssurancesView({ societes, biens, batiments, profiles, activeOwn
   const [defaultBien,     setDefaultBien]     = useState('')
   const [defaultBatiment, setDefaultBatiment] = useState('')
   const [collapsed,       setCollapsed]       = useState<Set<string>>(new Set())
+  const [expandedBats,    setExpandedBats]    = useState<Set<string>>(new Set())
+
+  function toggleBatBiens(id: string) {
+    setExpandedBats(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   function toggleSoc(id: string) {
     setCollapsed(prev => {
@@ -172,15 +181,20 @@ export function AssurancesView({ societes, biens, batiments, profiles, activeOwn
   }
 
   function renderBatiment(bat: Batiment) {
-    const batBiens = biens.filter(b => b.batiment_id === bat.id)
-    const batAss   = assurances.filter(a => a.batiment_id === bat.id)
+    const batBiens     = biens.filter(b => b.batiment_id === bat.id)
+    const batAss       = assurances.filter(a => a.batiment_id === bat.id)
+    const bienAssCount = batBiens.filter(b => assurances.some(a => a.bien_id === b.id)).length
+    const isExpanded   = expandedBats.has(bat.id)
+
     return (
       <div key={bat.id} className="as-bat">
         <div className="as-bat-hd">
           <div className="as-bat-hd-main">
             <span className="as-bat-name">{bat.name}</span>
             {batBiens.length > 0 && (
-              <span className="as-bat-lots">{batBiens.map(b => b.name).join(' · ')}</span>
+              <div className="as-bat-chips">
+                {batBiens.map(b => <span key={b.id} className="as-bat-chip">{b.name}</span>)}
+              </div>
             )}
           </div>
           <button className="as-bien-add" onClick={() => openModal({ batimentId: bat.id })}>
@@ -188,12 +202,24 @@ export function AssurancesView({ societes, biens, batiments, profiles, activeOwn
           </button>
         </div>
 
-        {batAss.length === 0 && batBiens.every(b => assurances.filter(a => a.bien_id === b.id).length === 0) && (
-          <p className="as-empty">Aucune assurance configurée</p>
-        )}
-
+        {batAss.length === 0 && <p className="as-empty">Aucune assurance bâtiment configurée</p>}
         {batAss.map(renderAssCard)}
-        {batBiens.map(b => renderBien(b, true))}
+
+        {batBiens.length > 0 && (
+          <>
+            <button className={`as-biens-toggle${isExpanded ? ' open' : ''}`} onClick={() => toggleBatBiens(bat.id)}>
+              <svg className={`as-toggle-chevron${isExpanded ? ' open' : ''}`} viewBox="0 0 10 6" width="10" height="6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 1l4 4 4-4" />
+              </svg>
+              Assurances par bien
+              {bienAssCount > 0 && (
+                <span className="as-biens-count">{bienAssCount} configurée{bienAssCount > 1 ? 's' : ''}</span>
+              )}
+              <span className="as-biens-total">{batBiens.length} bien{batBiens.length > 1 ? 's' : ''}</span>
+            </button>
+            {isExpanded && batBiens.map(b => renderBien(b, true))}
+          </>
+        )}
       </div>
     )
   }

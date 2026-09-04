@@ -600,10 +600,27 @@ button { font-family: inherit; }
 }
 .as-bat-hd-main { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .as-bat-name { font-size: 13px; font-weight: 700; color: var(--tx1); }
-.as-bat-lots { font-size: 11px; color: var(--tx3); }
+.as-bat-chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.as-bat-chip  { font-size: 11px; font-weight: 500; color: var(--tx2); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+
+/* Toggle "Assurances par bien" */
+.as-biens-toggle {
+  display: flex; align-items: center; gap: 7px;
+  width: 100%; padding: 8px 18px;
+  border: none; border-top: 1px solid var(--border);
+  background: var(--sunken);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--tx3); cursor: pointer; text-align: left; transition: color .12s, background .12s;
+}
+.as-biens-toggle:hover { color: var(--tx2); }
+.as-biens-toggle.open  { color: var(--tx2); }
+.as-toggle-chevron { transition: transform .2s; flex-shrink: 0; }
+.as-toggle-chevron.open { transform: rotate(180deg); }
+.as-biens-count { font-size: 11px; background: var(--surface); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; color: var(--tx1); font-weight: 600; }
+.as-biens-total { margin-left: auto; font-weight: 400; }
 
 /* Bien dans un bâtiment (niveau imbriqué) */
-.as-bat-bien     { border-top: 1px solid var(--border); }
+.as-bat-bien     { border-top: 1px solid var(--border); background: var(--surface); }
 .as-bat-bien-hd  { display: flex; align-items: center; gap: 10px; padding: 7px 18px 7px 30px; }
 
 .as-card    { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
