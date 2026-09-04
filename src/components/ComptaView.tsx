@@ -146,10 +146,23 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
           <div className="ct-table">
             {socTmpls.map(tmpl => {
               const periods = getPeriods(tmpl, year)
+              const nextPeriod = periods.find(p => !doneSet.has(`${tmpl.id}::${p.key}`))
+              const nextCls = nextPeriod
+                ? nextPeriod.dueDate < today    ? 'ct-next-date late'
+                : nextPeriod.dueDate <= soonDate ? 'ct-next-date soon'
+                : 'ct-next-date'
+                : null
               return (
                 <div key={tmpl.id} className="ct-row">
                   <div className="ct-row-info">
-                    <span className="ct-row-name">{tmpl.label}</span>
+                    <div className="ct-row-name-row">
+                      <span className="ct-row-name">{tmpl.label}</span>
+                      {nextPeriod && nextCls && (
+                        <span className={nextCls}>
+                          {nextPeriod.label} · {nextPeriod.dueDate.slice(5).replace('-', '/')}
+                        </span>
+                      )}
+                    </div>
                     <span className="ct-row-freq">{tmpl.frequency}</span>
                   </div>
                   <div className="ct-chips">
@@ -164,7 +177,6 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
                           title={`Échéance : ${p.dueDate}`} disabled={toggling === dk}>
                           {done && <svg viewBox="0 0 10 8" width="10" height="8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4l3 3 5-6"/></svg>}
                           {p.label}
-                          {!done && <span className="ct-chip-date">{p.dueDate.slice(5).replace('-', '/')}</span>}
                         </button>
                       )
                     })}
