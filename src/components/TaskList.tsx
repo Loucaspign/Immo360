@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Tache, DisplayStatus } from '../types'
 import { getDisplayStatus } from '../lib/utils'
 import { TaskCard } from './TaskCard'
@@ -20,6 +21,16 @@ function sortTasks(tasks: Tache[]): Tache[] {
     if (a.due_date && b.due_date) return a.due_date.localeCompare(b.due_date)
     return 0
   })
+}
+
+function Chevron({ collapsed }: { collapsed: boolean }) {
+  return (
+    <svg className={`grp-chevron${collapsed ? ' collapsed' : ''}`}
+      viewBox="0 0 10 6" width="10" height="6" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 1l4 4 4-4" />
+    </svg>
+  )
 }
 
 function StatusPills({ tasks }: { tasks: Tache[] }) {
@@ -65,27 +76,49 @@ function BienGroup({ name, tasks, onRefresh, onEdit, general = false }: Entry & 
 }
 
 function SocGroup({ name, tasks, onRefresh, onEdit }: Entry & Pick<Props, 'onRefresh' | 'onEdit'>) {
+  const [collapsed, setCollapsed] = useState(false)
   const { biens, general } = splitByBien(tasks)
   return (
     <div className="grp-soc">
-      <div className="grp-soc-hd">
+      <button className="grp-soc-hd" onClick={() => setCollapsed(c => !c)}>
         <span className="grp-soc-name">{name}</span>
         <StatusPills tasks={tasks} />
-      </div>
-      {biens.length > 0 ? (
-        <>
-          {general.length > 0 && (
-            <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} general />
-          )}
-          {biens.map(([id, bien]) => (
-            <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
-          ))}
-        </>
-      ) : (
-        sortTasks(tasks).map(t => (
-          <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
-        ))
+        <Chevron collapsed={collapsed} />
+      </button>
+      {!collapsed && (
+        biens.length > 0 ? (
+          <>
+            {general.length > 0 && (
+              <BienGroup name="Général" tasks={general} onRefresh={onRefresh} onEdit={onEdit} general />
+            )}
+            {biens.map(([id, bien]) => (
+              <BienGroup key={id} {...bien} onRefresh={onRefresh} onEdit={onEdit} />
+            ))}
+          </>
+        ) : (
+          sortTasks(tasks).map(t => (
+            <TaskCard key={t.id} tache={t} onRefresh={onRefresh} onEdit={onEdit} />
+          ))
+        )
       )}
+    </div>
+  )
+}
+
+function OwnerGroup({
+  name, color, socs, onRefresh, onEdit,
+}: { name: string; color: string; socs: Map<string, Entry> } & Pick<Props, 'onRefresh' | 'onEdit'>) {
+  const [collapsed, setCollapsed] = useState(false)
+  return (
+    <div className="grp-owner">
+      <button className="grp-owner-hd" onClick={() => setCollapsed(c => !c)}>
+        <span className="grp-owner-dot" style={{ background: color }} />
+        <span className="grp-owner-name">{name}</span>
+        <Chevron collapsed={collapsed} />
+      </button>
+      {!collapsed && [...socs.entries()].map(([socId, soc]) => (
+        <SocGroup key={socId} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
+      ))}
     </div>
   )
 }
@@ -152,15 +185,14 @@ export function TaskList({ taches, activeOwner, activeSoc, onRefresh, onEdit }: 
       owner.socs.get(socId)!.tasks.push(t)
     }
     groups = [...owners.entries()].map(([ownerId, owner]) => (
-      <div key={ownerId} className="grp-owner">
-        <div className="grp-owner-hd">
-          <span className="grp-owner-dot" style={{ background: owner.color }} />
-          <span className="grp-owner-name">{owner.name}</span>
-        </div>
-        {[...owner.socs.entries()].map(([socId, soc]) => (
-          <SocGroup key={socId} {...soc} onRefresh={onRefresh} onEdit={onEdit} />
-        ))}
-      </div>
+      <OwnerGroup
+        key={ownerId}
+        name={owner.name}
+        color={owner.color}
+        socs={owner.socs}
+        onRefresh={onRefresh}
+        onEdit={onEdit}
+      />
     ))
   }
 

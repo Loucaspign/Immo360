@@ -210,23 +210,30 @@ button { font-family: inherit; }
 .grp-owner { margin-bottom: 30px; }
 .grp-owner-hd {
   display: flex; align-items: center; gap: 10px;
-  padding-bottom: 10px; margin-bottom: 12px;
+  padding-bottom: 10px; margin-bottom: 12px; width: 100%;
+  background: none; border: none; cursor: pointer; text-align: left;
 }
+.grp-owner-hd:hover .grp-owner-name { color: var(--uL); }
 .grp-owner-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .grp-owner-name {
   font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
-  color: var(--tx1);
+  color: var(--tx1); transition: color .12s;
 }
+.grp-chevron { color: var(--tx3); transition: transform .2s; flex-shrink: 0; margin-left: auto; }
+.grp-chevron.collapsed { transform: rotate(-90deg); }
 
 /* ── GROUPES PAR SOCIÉTÉ ────────────────────────────────────── */
 .grp-soc { margin-bottom: 18px; }
 .grp-soc-hd {
-  display: flex; align-items: baseline; gap: 9px;
-  padding: 4px 0 7px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 4px 0 7px; width: 100%;
+  background: none; border: none; cursor: pointer; text-align: left;
 }
+.grp-soc-hd:hover .grp-soc-name { color: var(--uL); }
 .grp-soc-name {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 14px; font-weight: 700; color: var(--tx1); letter-spacing: -0.01em;
+  transition: color .12s;
 }
 .soc-pills { display: flex; gap: 5px; }
 .soc-pill {
@@ -424,6 +431,10 @@ button { font-family: inherit; }
 }
 .main-nav-tab:hover   { color: var(--tx1); }
 .main-nav-tab.active  { color: var(--uL); border-bottom-color: var(--uL); }
+.main-nav-sep {
+  width: 1px; height: 16px; background: var(--border-s);
+  align-self: center; flex-shrink: 0; margin: 0 6px;
+}
 
 /* ── COMPTABILITÉ VIEW ──────────────────────────────────────── */
 .ct-scroll {
@@ -483,12 +494,12 @@ button { font-family: inherit; }
 
 .as-toolbar { display: flex; justify-content: flex-end; padding: 20px 0 12px; }
 .ct-add-btn {
-  padding: 5px 12px; border-radius: 7px;
-  border: 1px solid var(--border-s); background: var(--sunken);
-  font-size: 13px; font-weight: 600; color: var(--tx2);
-  cursor: pointer; transition: all .1s; white-space: nowrap;
+  padding: 3px 10px; border-radius: 6px;
+  border: 1px solid var(--border); background: none;
+  font-size: 12px; font-weight: 600; color: var(--uL);
+  cursor: pointer; transition: all .15s; white-space: nowrap;
 }
-.ct-add-btn:hover { background: var(--surface); border-color: var(--uL); color: var(--uL); }
+.ct-add-btn:hover { background: var(--info-bg); border-color: var(--uL); }
 
 .ct-empty { padding: 16px 18px; font-size: 13px; color: var(--tx3); }
 

@@ -152,8 +152,9 @@ export default function App() {
         <div className="main-nav">
           <button className={`main-nav-tab${view === 'tasks'      ? ' active' : ''}`} onClick={() => setView('tasks')}>Tâches</button>
           <button className={`main-nav-tab${view === 'compta'     ? ' active' : ''}`} onClick={() => setView('compta')}>Comptabilité</button>
-          <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
           <button className={`main-nav-tab${view === 'loyers'     ? ' active' : ''}`} onClick={() => setView('loyers')}>Loyers</button>
+          <span className="main-nav-sep" />
+          <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
           <button className={`main-nav-tab${view === 'cadastres'  ? ' active' : ''}`} onClick={() => setView('cadastres')}>Précomptes</button>
         </div>
 
