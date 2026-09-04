@@ -199,6 +199,7 @@ export default function App() {
           <AssurancesView
             societes={societes}
             biens={biens}
+            batiments={batiments}
             profiles={profiles}
             activeOwner={activeOwner}
             activeSoc={activeSoc}

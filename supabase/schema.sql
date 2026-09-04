@@ -155,9 +155,13 @@ create policy "compta_entries: full access" on public.compta_entries to authenti
 
 
 -- ── Assurances ────────────────────────────────────────────────
+-- bien_id     : assurance propre à un bien (RC locataire, omnium…)
+-- batiment_id : assurance couvrant le bâtiment entier (incendie…)
+-- Exactement un des deux doit être renseigné
 create table public.assurances (
   id                   uuid primary key default gen_random_uuid(),
-  bien_id              uuid references public.biens(id) on delete cascade not null,
+  bien_id              uuid references public.biens(id) on delete cascade,
+  batiment_id          uuid references public.batiments(id) on delete cascade,
   type                 text not null check (type in ('incendie','protection_juridique','omnium','loyers_impayes','rc_proprietaire','rc_locataire','autre')),
   statut               text not null default 'actif' check (statut in ('actif','resilie','en_renouvellement')),
   compagnie            text,
@@ -178,7 +182,8 @@ create table public.assurances (
   chomage_immobilier   boolean not null default false,
   notes                text,
   active               boolean not null default true,
-  created_at           timestamptz default now()
+  created_at           timestamptz default now(),
+  constraint assurances_bien_or_bat check ((bien_id is null) != (batiment_id is null))
 );
 alter table public.assurances enable row level security;
 create policy "assurances: full access" on public.assurances to authenticated using (true) with check (true);
@@ -296,6 +301,14 @@ alter table public.biens
 alter table public.precomptes
   add column if not exists batiment_id uuid references public.batiments(id) on delete cascade,
   alter column bien_id drop not null;
+
+-- 5. Migrer assurances : ajouter batiment_id, rendre bien_id nullable
+alter table public.assurances
+  add column if not exists batiment_id uuid references public.batiments(id) on delete cascade,
+  alter column bien_id drop not null;
+alter table public.assurances
+  add constraint if not exists assurances_bien_or_bat
+  check ((bien_id is null) != (batiment_id is null));
 
 -- 4. Supprimer l'ancienne contrainte unique et ajouter les nouvelles partielles
 alter table public.precomptes

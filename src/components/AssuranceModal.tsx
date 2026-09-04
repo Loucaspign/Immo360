@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Bien, Assurance, AssuranceType, AssuranceFrequence, AssuranceStatut } from '../types'
+import type { Bien, Batiment, Assurance, AssuranceType, AssuranceFrequence, AssuranceStatut } from '../types'
 
 const TYPES: { value: AssuranceType; label: string }[] = [
   { value: 'incendie',             label: 'Incendie & RC' },
@@ -25,43 +25,55 @@ const STATUTS: { value: AssuranceStatut; label: string }[] = [
 ]
 
 interface Props {
-  biens:          Bien[]
-  defaultBienId:  string
-  editAssurance?: Assurance
-  onClose:        () => void
-  onSaved:        () => void
+  biens:             Bien[]
+  batiments:         Batiment[]
+  defaultBienId:     string
+  defaultBatimentId: string
+  editAssurance?:    Assurance
+  onClose:           () => void
+  onSaved:           () => void
 }
 
-export function AssuranceModal({ biens, defaultBienId, editAssurance, onClose, onSaved }: Props) {
+export function AssuranceModal({
+  biens, batiments, defaultBienId, defaultBatimentId, editAssurance, onClose, onSaved,
+}: Props) {
   const e = editAssurance
-  const [bienId,    setBienId]    = useState(e?.bien_id              ?? defaultBienId)
-  const [type,      setType]      = useState<AssuranceType>(e?.type  ?? 'incendie')
-  const [statut,    setStatut]    = useState<AssuranceStatut>(e?.statut ?? 'actif')
-  const [compagnie, setCompagnie] = useState(e?.compagnie            ?? '')
-  const [police,    setPolice]    = useState(e?.numero_police        ?? '')
-  const [courtier,  setCourtier]  = useState(e?.courtier             ?? '')
-  const [contact,   setContact]   = useState(e?.contact_courtier     ?? '')
-  const [prime,     setPrime]     = useState(e?.prime != null ? String(e.prime) : '')
-  const [frequence, setFrequence] = useState<AssuranceFrequence>(e?.frequence_paiement ?? 'annuel')
-  const [dateDebut, setDateDebut] = useState(e?.date_debut           ?? '')
-  const [dateEch,   setDateEch]   = useState(e?.date_echeance        ?? '')
-  const [datePay,   setDatePay]   = useState(e?.date_paiement        ?? '')
-  const [preavis,   setPreavis]   = useState(e?.preavis_mois != null ? String(e.preavis_mois) : '3')
-  const [franchise, setFranchise] = useState(e?.franchise != null ? String(e.franchise) : '')
-  const [valeur,    setValeur]    = useState(e?.valeur_assuree != null ? String(e.valeur_assuree) : '')
-  const [perteInd,  setPerteInd]  = useState(e?.perte_indirecte      ?? false)
-  const [protJur,   setProtJur]   = useState(e?.protection_juridique ?? false)
-  const [abandon,   setAbandon]   = useState(e?.abandon_recours      ?? false)
-  const [chomage,   setChomage]   = useState(e?.chomage_immobilier   ?? false)
-  const [notes,     setNotes]     = useState(e?.notes                ?? '')
-  const [saving,    setSaving]    = useState(false)
-  const [error,     setError]     = useState('')
+
+  // Mode : 'bat' si batiment_id défini, 'bien' sinon
+  const initMode = e ? (e.batiment_id ? 'bat' : 'bien') : (defaultBatimentId ? 'bat' : 'bien')
+  const [mode] = useState<'bat' | 'bien'>(initMode)
+
+  const [batimentId, setBatimentId] = useState(e?.batiment_id ?? defaultBatimentId)
+  const [bienId,     setBienId]     = useState(e?.bien_id     ?? defaultBienId)
+  const [type,       setType]       = useState<AssuranceType>(e?.type    ?? 'incendie')
+  const [statut,     setStatut]     = useState<AssuranceStatut>(e?.statut ?? 'actif')
+  const [compagnie,  setCompagnie]  = useState(e?.compagnie          ?? '')
+  const [police,     setPolice]     = useState(e?.numero_police       ?? '')
+  const [courtier,   setCourtier]   = useState(e?.courtier            ?? '')
+  const [contact,    setContact]    = useState(e?.contact_courtier    ?? '')
+  const [prime,      setPrime]      = useState(e?.prime != null ? String(e.prime) : '')
+  const [frequence,  setFrequence]  = useState<AssuranceFrequence>(e?.frequence_paiement ?? 'annuel')
+  const [dateDebut,  setDateDebut]  = useState(e?.date_debut          ?? '')
+  const [dateEch,    setDateEch]    = useState(e?.date_echeance        ?? '')
+  const [datePay,    setDatePay]    = useState(e?.date_paiement        ?? '')
+  const [preavis,    setPreavis]    = useState(e?.preavis_mois != null ? String(e.preavis_mois) : '3')
+  const [franchise,  setFranchise]  = useState(e?.franchise != null ? String(e.franchise) : '')
+  const [valeur,     setValeur]     = useState(e?.valeur_assuree != null ? String(e.valeur_assuree) : '')
+  const [perteInd,   setPerteInd]   = useState(e?.perte_indirecte      ?? false)
+  const [protJur,    setProtJur]    = useState(e?.protection_juridique ?? false)
+  const [abandon,    setAbandon]    = useState(e?.abandon_recours       ?? false)
+  const [chomage,    setChomage]    = useState(e?.chomage_immobilier    ?? false)
+  const [notes,      setNotes]      = useState(e?.notes                ?? '')
+  const [saving,     setSaving]     = useState(false)
+  const [error,      setError]      = useState('')
 
   async function save() {
-    if (!bienId) { setError('Bien requis.'); return }
+    if (mode === 'bat' && !batimentId) { setError('Bâtiment requis.'); return }
+    if (mode === 'bien' && !bienId)    { setError('Bien requis.');      return }
     setSaving(true); setError('')
     const payload = {
-      bien_id:              bienId,
+      bien_id:              mode === 'bien' ? bienId     : null,
+      batiment_id:          mode === 'bat'  ? batimentId : null,
       type, statut,
       compagnie:            compagnie.trim() || null,
       numero_police:        police.trim()    || null,
@@ -100,11 +112,23 @@ export function AssuranceModal({ biens, defaultBienId, editAssurance, onClose, o
 
           <div className="mf-row">
             <div className="mf-group">
-              <label className="mf-label">Bien <span className="mf-req">*</span></label>
-              <select className="mf-select" value={bienId} onChange={ev => setBienId(ev.target.value)}>
-                <option value="">— Choisir —</option>
-                {biens.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+              {mode === 'bat' ? (
+                <>
+                  <label className="mf-label">Bâtiment <span className="mf-req">*</span></label>
+                  <select className="mf-select" value={batimentId ?? ''} onChange={ev => setBatimentId(ev.target.value)} disabled={!!e}>
+                    <option value="">— Choisir —</option>
+                    {batiments.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </>
+              ) : (
+                <>
+                  <label className="mf-label">Bien <span className="mf-req">*</span></label>
+                  <select className="mf-select" value={bienId ?? ''} onChange={ev => setBienId(ev.target.value)} disabled={!!e}>
+                    <option value="">— Choisir —</option>
+                    {biens.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                  </select>
+                </>
+              )}
             </div>
             <div className="mf-group">
               <label className="mf-label">Type</label>

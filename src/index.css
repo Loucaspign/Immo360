@@ -555,10 +555,25 @@ button { font-family: inherit; }
 .as-bien:last-child { border-bottom: none; }
 .as-bien-hd { display: flex; align-items: center; gap: 10px; padding: 9px 18px; background: var(--sunken); }
 .as-bien-name { font-size: 13px; font-weight: 600; color: var(--tx2); flex: 1; }
-.as-bien-add  { font-size: 12px; font-weight: 600; color: var(--uL); background: none; border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+.as-bien-add  { font-size: 12px; font-weight: 600; color: var(--uL); background: none; border: 1px solid var(--border); padding: 3px 10px; border-radius: 6px; cursor: pointer; transition: all .15s; white-space: nowrap; }
 .as-bien-add:hover { background: var(--info-bg); border-color: var(--uL); }
 
 .as-empty   { padding: 12px 18px; font-size: 13px; color: var(--tx3); font-style: italic; margin: 0; }
+
+/* Bâtiment dans AssurancesView */
+.as-bat { border-bottom: 1px solid var(--border); }
+.as-bat:last-child { border-bottom: none; }
+.as-bat-hd {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 18px; background: var(--sunken);
+}
+.as-bat-hd-main { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.as-bat-name { font-size: 13px; font-weight: 700; color: var(--tx1); }
+.as-bat-lots { font-size: 11px; color: var(--tx3); }
+
+/* Bien dans un bâtiment (niveau imbriqué) */
+.as-bat-bien     { border-top: 1px solid var(--border); }
+.as-bat-bien-hd  { display: flex; align-items: center; gap: 10px; padding: 7px 18px 7px 30px; }
 
 .as-card    { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
 .as-card:last-child { border-bottom: none; }

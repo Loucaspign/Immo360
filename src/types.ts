@@ -40,7 +40,8 @@ export type AssuranceStatut   = 'actif' | 'resilie' | 'en_renouvellement'
 
 export interface Assurance {
   id:                   string
-  bien_id:              string
+  bien_id:              string | null
+  batiment_id:          string | null
   type:                 AssuranceType
   statut:               AssuranceStatut
   compagnie:            string | null
