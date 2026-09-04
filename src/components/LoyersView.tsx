@@ -136,6 +136,9 @@ export function LoyersView({ societes, biens, profiles, activeOwner, activeSoc, 
       : profiles.map(p => ({ profile: p, socs: visibleSocs.filter(s => s.owner_id === p.id) }))
                .filter(g => g.socs.length > 0)
 
+  const allSocIds    = groups.flatMap(g => g.socs.map(s => s.id))
+  const allCollapsed = allSocIds.length > 0 && allSocIds.every(id => collapsed.has(id))
+
   function renderBien(bien: Bien) {
     const loc = locataires.find(l => l.bien_id === bien.id)
 
@@ -300,6 +303,12 @@ export function LoyersView({ societes, biens, profiles, activeOwner, activeSoc, 
           <span className="ct-year">{year}</span>
           <button className="ct-yr-btn" onClick={() => setYear(y => y + 1)}>›</button>
         </div>
+        {allSocIds.length > 0 && (
+          <button className="ct-collapse-btn" onClick={() =>
+            setCollapsed(allCollapsed ? new Set() : new Set(allSocIds))}>
+            {allCollapsed ? 'Tout déployer' : 'Tout réduire'}
+          </button>
+        )}
       </div>
 
       {groups.map((g, i) => (

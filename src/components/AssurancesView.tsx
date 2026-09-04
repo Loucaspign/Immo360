@@ -188,8 +188,19 @@ export function AssurancesView({ societes, biens, profiles, activeOwner, activeS
     )
   }
 
+  const allSocIds = groups.flatMap(g => g.socs.map(s => s.id))
+  const allCollapsed = allSocIds.length > 0 && allSocIds.every(id => collapsed.has(id))
+
   return (
     <div className="as-scroll">
+      {allSocIds.length > 0 && (
+        <div className="as-toolbar">
+          <button className="ct-collapse-btn" onClick={() =>
+            setCollapsed(allCollapsed ? new Set() : new Set(allSocIds))}>
+            {allCollapsed ? 'Tout déployer' : 'Tout réduire'}
+          </button>
+        </div>
+      )}
       {groups.map((g, i) => (
         <div key={g.profile?.id ?? i} className="as-group">
           {g.profile && (

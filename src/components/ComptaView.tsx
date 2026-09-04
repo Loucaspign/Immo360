@@ -70,8 +70,17 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
   const [editTmpl,    setEditTmpl]    = useState<ComptaTemplate | undefined>()
   const [defaultSoc,  setDefaultSoc]  = useState('')
   const [toggling,    setToggling]    = useState<string | null>(null)
+  const [collapsed,   setCollapsed]   = useState<Set<string>>(new Set())
 
   const today = new Date().toISOString().slice(0, 10)
+
+  function toggleSoc(id: string) {
+    setCollapsed(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
   const soonDate = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10)
 
   useEffect(() => { loadAll() }, [refreshKey])
@@ -127,11 +136,19 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
 
   function renderSoc(soc: Societe) {
     const socTmpls = templates.filter(t => t.societe_id === soc.id)
+    const isCollapsed = collapsed.has(soc.id)
     return (
       <div key={soc.id} className="ct-soc">
         <div className="ct-soc-hd">
-          <div className="ct-soc-dot" style={{ background: soc.owner?.color_css }} />
-          <span className="ct-soc-name">{soc.name}</span>
+          <button className="ct-soc-toggle" onClick={() => toggleSoc(soc.id)}>
+            <div className="ct-soc-dot" style={{ background: soc.owner?.color_css }} />
+            <span className="ct-soc-name">{soc.name}</span>
+            <svg className={`ct-chevron${isCollapsed ? ' collapsed' : ''}`}
+              viewBox="0 0 10 6" width="10" height="6" fill="none"
+              stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 1l4 4 4-4" />
+            </svg>
+          </button>
           <button
             className="ct-add-btn"
             onClick={() => { setDefaultSoc(soc.id); setEditTmpl(undefined); setShowModal(true) }}
@@ -140,7 +157,7 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
           </button>
         </div>
 
-        {socTmpls.length === 0 ? (
+        {!isCollapsed && (socTmpls.length === 0 ? (
           <p className="ct-empty">Aucune obligation configurée</p>
         ) : (
           <div className="ct-table">
@@ -176,10 +193,13 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
               )
             })}
           </div>
-        )}
+        ))}
       </div>
     )
   }
+
+  const allSocIds = groups.flatMap(g => g.socs.map(s => s.id))
+  const allCollapsed = allSocIds.length > 0 && allSocIds.every(id => collapsed.has(id))
 
   return (
     <div className="ct-scroll">
@@ -189,6 +209,12 @@ export function ComptaView({ societes, profiles, activeOwner, activeSoc, refresh
           <span className="ct-year">{year}</span>
           <button className="ct-yr-btn" onClick={() => setYear(y => y + 1)}>›</button>
         </div>
+        {allSocIds.length > 0 && (
+          <button className="ct-collapse-btn" onClick={() =>
+            setCollapsed(allCollapsed ? new Set() : new Set(allSocIds))}>
+            {allCollapsed ? 'Tout déployer' : 'Tout réduire'}
+          </button>
+        )}
       </div>
 
       {groups.map((g, i) => (
