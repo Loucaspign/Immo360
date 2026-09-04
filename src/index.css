@@ -535,8 +535,8 @@ button { font-family: inherit; }
 .as-soc     { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
 .as-soc-hd  { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface); width: 100%; text-align: left; border-left: none; border-right: none; border-top: none; cursor: pointer; transition: background .15s; }
 .as-soc-hd:hover { background: var(--sunken); }
-.as-soc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.as-soc-name { font-size: 14px; font-weight: 700; color: var(--tx1); flex: 1; }
+.as-soc-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.as-soc-name { font-size: 15px; font-weight: 700; color: var(--tx1); flex: 1; }
 .as-chevron { color: var(--tx3); flex-shrink: 0; transition: transform .2s; }
 .as-chevron.collapsed { transform: rotate(-90deg); }
 
@@ -607,36 +607,39 @@ button { font-family: inherit; }
 .tab-panel[hidden]  { display: none !important; }
 
 /* ── Loyers ─────────────────────────────────────────────────── */
-.ly-scroll  { padding: 20px 24px 48px; overflow-y: auto; }
-.ly-toolbar { display: flex; align-items: center; margin-bottom: 20px; }
+.ly-scroll  { flex: 1; padding: 0 28px 40px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border-s) transparent; }
+.ly-scroll::-webkit-scrollbar { width: 4px; }
+.ly-scroll::-webkit-scrollbar-thumb { background: var(--border-s); border-radius: 10px; }
+.ly-toolbar { display: flex; align-items: center; gap: 12px; padding: 20px 0 8px; }
 .ly-group   { margin-bottom: 24px; }
 
 .ly-soc {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
   margin-bottom: 12px;
+  box-shadow: var(--sh-s);
 }
 
 .ly-soc-hd {
-  display: flex; align-items: center; gap: 8px;
-  padding: 12px 16px; width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 18px; width: 100%;
   background: none; border: none; cursor: pointer; text-align: left;
 }
 .ly-soc-hd:hover { background: var(--sunken); }
 
-.ly-soc-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.ly-soc-name { font-size: 13px; font-weight: 600; color: var(--tx1); flex: 1; }
-.ly-chevron  { color: var(--tx3); transition: transform .2s; margin-left: auto; }
+.ly-soc-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.ly-soc-name { font-size: 15px; font-weight: 700; color: var(--tx1); flex: 1; }
+.ly-chevron  { color: var(--tx3); transition: transform .2s; margin-left: auto; flex-shrink: 0; }
 .ly-chevron.collapsed { transform: rotate(-90deg); }
 
 .ly-bien    { border-top: 1px solid var(--border); }
 .ly-bien-hd {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 16px; background: var(--sunken);
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 18px; background: var(--sunken);
 }
-.ly-bien-name { font-size: 12px; font-weight: 600; color: var(--tx2); flex: 1; }
+.ly-bien-name { font-size: 13px; font-weight: 600; color: var(--tx2); flex: 1; }
 
 .ly-add-loc {
   font-size: 12px; font-weight: 600; color: var(--uL); background: none;
@@ -646,11 +649,11 @@ button { font-family: inherit; }
 .ly-add-loc:hover { background: var(--info-bg); border-color: var(--uL); }
 
 .ly-empty {
-  font-size: 12px; color: var(--tx3);
-  padding: 8px 16px 12px; margin: 0; font-style: italic;
+  font-size: 13px; color: var(--tx3);
+  padding: 12px 18px; margin: 0; font-style: italic;
 }
 
-.ly-card { padding: 12px 16px 14px; }
+.ly-card { padding: 12px 18px 14px; }
 
 .ly-card-hd {
   display: flex; align-items: center; gap: 8px;
