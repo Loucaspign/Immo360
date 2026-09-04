@@ -928,7 +928,7 @@ button { font-family: inherit; }
 .mf-check input[type="radio"] { width: 14px; height: 14px; accent-color: var(--uL); cursor: pointer; flex-shrink: 0; }
 
 /* ── Pense-bête ─────────────────────────────────────────────── */
-.pb-scroll { flex: 1; overflow-y: auto; padding: 0 28px 40px; }
+.pb-scroll { flex: 1; overflow-y: auto; padding: 20px 28px 40px; }
 
 .pb-grid {
   display: grid;
@@ -972,19 +972,6 @@ button { font-family: inherit; }
 .pb-sky      { --pb-bg: #E0F2FE; --pb-txt: rgba(0,0,0,.78); background: var(--pb-bg); color: var(--pb-txt); }
 .pb-lavender { --pb-bg: #EDE9FE; --pb-txt: rgba(0,0,0,.78); background: var(--pb-bg); color: var(--pb-txt); }
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .pb-yellow   { --pb-bg: #3B2F00; --pb-txt: rgba(255,255,255,.85); }
-  :root:not([data-theme="light"]) .pb-pink     { --pb-bg: #450F2A; --pb-txt: rgba(255,255,255,.85); }
-  :root:not([data-theme="light"]) .pb-mint     { --pb-bg: #04422A; --pb-txt: rgba(255,255,255,.85); }
-  :root:not([data-theme="light"]) .pb-sky      { --pb-bg: #052B45; --pb-txt: rgba(255,255,255,.85); }
-  :root:not([data-theme="light"]) .pb-lavender { --pb-bg: #271550; --pb-txt: rgba(255,255,255,.85); }
-}
-:root[data-theme="dark"] .pb-yellow   { --pb-bg: #3B2F00; --pb-txt: rgba(255,255,255,.85); }
-:root[data-theme="dark"] .pb-pink     { --pb-bg: #450F2A; --pb-txt: rgba(255,255,255,.85); }
-:root[data-theme="dark"] .pb-mint     { --pb-bg: #04422A; --pb-txt: rgba(255,255,255,.85); }
-:root[data-theme="dark"] .pb-sky      { --pb-bg: #052B45; --pb-txt: rgba(255,255,255,.85); }
-:root[data-theme="dark"] .pb-lavender { --pb-bg: #271550; --pb-txt: rgba(255,255,255,.85); }
 
 /* Delete button */
 .pb-del-btn {
