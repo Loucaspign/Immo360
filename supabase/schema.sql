@@ -223,6 +223,25 @@ create policy "montants_impayes: full access" on public.montants_impayes to auth
 grant select, insert, update, delete on public.montants_impayes to authenticated;
 
 
+-- ── Cadastres — précompte immobilier par bien ─────────────────
+create table public.cadastres (
+  id            uuid primary key default gen_random_uuid(),
+  bien_id       uuid references public.biens(id) on delete cascade not null,
+  annee         int not null check (annee between 2000 and 2100),
+  montant       numeric(10,2),
+  date_paiement date,
+  a_refacturer  boolean not null default false,
+  paye          boolean not null default false,
+  facture       boolean not null default false,
+  notes         text,
+  active        boolean not null default true,
+  created_at    timestamptz default now(),
+  unique(bien_id, annee)
+);
+alter table public.cadastres enable row level security;
+create policy "cadastres: full access" on public.cadastres to authenticated using (true) with check (true);
+grant select, insert, update, delete on public.cadastres to authenticated;
+
 -- ══════════════════════════════════════════════════════════════
 --  Données de départ — à adapter avec les vrais UUIDs des comptes
 --  Créer d'abord les 3 comptes via Supabase Dashboard → Authentication

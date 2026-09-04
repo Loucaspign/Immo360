@@ -87,6 +87,20 @@ export interface ComptaEntry {
   notes:       string | null
   created_at:  string
 }
+export interface Cadastre {
+  id:            string
+  bien_id:       string
+  annee:         number
+  montant:       number | null
+  date_paiement: string | null
+  a_refacturer:  boolean
+  paye:          boolean
+  facture:       boolean
+  notes:         string | null
+  active:        boolean
+  created_at:    string
+}
+
 export type TaskStatus   = 'todo' | 'done'
 export type DisplayStatus = 'overdue' | 'today' | 'week' | 'upcoming' | 'done'
 
