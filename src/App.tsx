@@ -147,7 +147,7 @@ export default function App() {
           <button className={`main-nav-tab${view === 'assurances' ? ' active' : ''}`} onClick={() => setView('assurances')}>Assurances</button>
         </div>
 
-        {view === 'tasks' && <>
+        <div className="tab-panel" hidden={view !== 'tasks'}>
           <div className="mhdr">
             <div className="hdr-row">
               <div>
@@ -170,9 +170,9 @@ export default function App() {
             onRefresh={loadData}
             onEdit={t => { setEditTache(t); setShowNewTask(true) }}
           />
-        </>}
+        </div>
 
-        {view === 'assurances' && <>
+        <div className="tab-panel" hidden={view !== 'assurances'}>
           <div className="mhdr">
             <div className="hdr-row">
               <div>
@@ -189,9 +189,9 @@ export default function App() {
             activeSoc={activeSoc}
             refreshKey={assurancesRefreshKey}
           />
-        </>}
+        </div>
 
-        {view === 'compta' && <>
+        <div className="tab-panel" hidden={view !== 'compta'}>
           <div className="mhdr">
             <div className="hdr-row">
               <div>
@@ -201,7 +201,7 @@ export default function App() {
             </div>
           </div>
           <ComptaView societes={societes} profiles={profiles} activeOwner={activeOwner} activeSoc={activeSoc} refreshKey={comptaRefreshKey} />
-        </>}
+        </div>
       </main>
 
       <NewTaskModal

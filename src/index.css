@@ -585,6 +585,10 @@ button { font-family: inherit; }
 .mf-check input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--uL); cursor: pointer; flex-shrink: 0; }
 .mf-check:has(input:checked) { background: var(--info-bg); border-color: var(--uL); color: var(--uL); }
 
+/* Onglets toujours montés, cachés par l'attribut HTML hidden */
+.tab-panel          { display: contents; }
+.tab-panel[hidden]  { display: none !important; }
+
 /* ── A11Y ───────────────────────────────────────────────────── */
 :focus-visible { outline: 2px solid var(--uL); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
